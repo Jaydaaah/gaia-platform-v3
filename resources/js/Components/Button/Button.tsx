@@ -2,8 +2,8 @@ import { Color, Size } from "@/types/Types";
 import { ButtonHTMLAttributes, useMemo } from "react";
 
 interface ButtonProps {
-    color: Color;
-    size: Size;
+    color?: Color;
+    size?: Size;
 }
 export default function Button({
     className,

@@ -45,4 +45,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function folders()
+    {
+        return $this->hasMany(Folder::class, 'owner_id');
+    }
+
+    public function exam_files()
+    {
+        return $this->belongsToMany(ExamFile::class, 'users_exam_files');
+    }
 }
