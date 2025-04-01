@@ -2,16 +2,24 @@ import Field from "@/Components/FieldSet/Field";
 import ModalAction from "@/Components/Modal/ModalAction";
 import FieldSetLabel from "@/Components/FieldSet/FieldSetLabel";
 import Button from "@/Components/Button/Button";
-import { useForm } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
 import Loading from "@/Components/Loading/Loading";
 import { useCallback } from "react";
+import { PageProps } from "@/types";
 
 export default function DashboardCreateFolder({
     dialogRef,
 }: {
     dialogRef: React.RefObject<HTMLDialogElement>;
 }) {
-    const { data, setData, processing, post, errors } = useForm({ name: "" });
+    const {
+        props: { parent_id },
+    } = usePage<PageProps<{ parent_id?: number }>>();
+
+    const { data, setData, processing, post, errors } = useForm({
+        parent_id,
+        name: "",
+    });
 
     const onSubmit = useCallback(
         (event: React.FormEvent<HTMLFormElement>) => {
@@ -30,7 +38,7 @@ export default function DashboardCreateFolder({
 
     const onReset = useCallback(
         (event: React.FormEvent<HTMLFormElement>) => {
-            setData({ name: "" });
+            setData("name", "");
             dialogRef.current?.close();
         },
         [dialogRef]

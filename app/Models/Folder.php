@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Folder extends Model
 {
+    use SoftDeletes;
     protected $table = 'folders';
 
     protected $fillable = ['name', 'owner_id', 'parent_id'];
@@ -28,5 +30,18 @@ class Folder extends Model
     public function exam_files()
     {
         return $this->belongsToMany(ExamFile::class, 'folder_exam_files');
+    }
+
+    public function getFolderHierarchy(): array
+    {
+        $folders = [];
+        $currentFolder = $this;
+
+        while ($currentFolder) {
+            array_unshift($folders, $currentFolder);
+            $currentFolder = $currentFolder->parent_folder;
+        }
+
+        return $folders;
     }
 }

@@ -20,8 +20,36 @@ class DashboardController extends Controller
         $user = User::find(Auth::id());
 
         return Inertia::render('Dashboard/Dashboard', [
+            'hierarchy' => [],
+            'parent_id' => null,
+            'folder_name' => null,
             'folders' => Inertia::defer(
-                fn() => $user ? $user->folders()->whereNull('parent_id')->orderBy('name', 'asc')->get() : []
+                fn() => $user ? $user
+                    ->folders()
+                    ->whereNull('parent_id')
+                    ->orderBy('name', 'asc')
+                    ->get() : []
+            ),
+        ]);
+    }
+
+    public function show(int $folder_id)
+    {
+        $folder = Folder::findOrFail($folder_id);
+        $user = User::find(Auth::id());
+
+        return Inertia::render('Dashboard/Dashboard', [
+            'hierarchy' => Inertia::defer(
+                fn() => $folder->getFolderHierarchy()
+            ),
+            'parent_id' => $folder->id,
+            'folder_name' => $folder->name,
+            'folders' => Inertia::defer(
+                fn() => $folder
+                    ->subfolders()
+                    ->where('owner_id', $user->id)
+                    ->orderBy('name', 'asc')
+                    ->get()
             ),
         ]);
     }
@@ -29,7 +57,7 @@ class DashboardController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'parent_id' => 'exists:folders,id', // Ensure parent_id exists
+            'parent_id' => 'nullable|exists:folders,id',
             'name' => [
                 'required',
                 'min:2',
@@ -50,6 +78,18 @@ class DashboardController extends Controller
             'owner_id' => $owner_id
         ]);
 
-        return $this->sendToast($created_folder->id, 'success', 'Success fully created folder');
+        return $this->sendToast($created_folder->id, 'success', 'Successfully created folder');
+    }
+
+    public function destroy(int $folder_id)
+    {
+        $folder = Folder::findOrFail($folder_id);
+        $user = User::find(Auth::id());
+
+        abort_unless($folder->owner_id == $user->id, 403);
+
+        $folder->delete();
+
+        return $this->sendToast($folder->id, 'warning', 'Successfully deleted target folder');
     }
 }
