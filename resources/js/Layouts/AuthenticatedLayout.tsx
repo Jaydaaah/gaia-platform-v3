@@ -6,6 +6,8 @@ import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import ThemeController from "@/Components/ThemeController/ThemeController";
 import { Link, usePage } from "@inertiajs/react";
 import { PropsWithChildren, ReactNode, useState } from "react";
+import { Bounce, ToastContainer } from "react-toastify";
+import ToastProvider from "./partial/ToastProvider";
 
 const app_name = import.meta.env.VITE_APP_NAME;
 
@@ -17,7 +19,8 @@ export default function Authenticated({
 
     return (
         <div className="min-h-screen bg-background">
-            <nav className="navbar bg-base-100 shadow-sm">
+            <ToastProvider />
+            <nav className="navbar bg-base-100 shadow-xs">
                 <div className="flex-1">
                     <a className="btn btn-ghost text-xl">{app_name} v3</a>
                 </div>
@@ -54,7 +57,7 @@ export default function Authenticated({
                         </div>
                         <ul
                             tabIndex={0}
-                            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+                            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow-sm"
                         >
                             <ResponsiveNavLink href={route("profile.edit")}>
                                 Profile
