@@ -5,6 +5,8 @@ import DashboardToolPanel from "./partial/DashboardToolPanel";
 import { DashboardPage } from "./types";
 import DashboardPath from "./partial/DashboardPath";
 import { useEffect, useState } from "react";
+import Button from "@/Components/Button/Button";
+import DashboardUpload from "./partial/DashboardUpload";
 
 export default function Dashboard() {
     const [selected, setSelected] = useState<number | null>(null);
@@ -28,7 +30,10 @@ export default function Dashboard() {
                     <h2 className="text-xl font-semibold">
                         {folder_name ?? "File Manager"}
                     </h2>
-                    <DashboardToolPanel selected={selected} />
+                    <div className="flex gap-2">
+                        <DashboardToolPanel selected={selected} />
+                        <DashboardUpload />
+                    </div>
                 </div>
                 <DashboardPath />
                 <DashboardExplorer setSelected={setSelected} />

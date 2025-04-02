@@ -1,3 +1,4 @@
+import { BsFillTrashFill } from "react-icons/bs"; 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "../../../Components/Button/Button";
 import Modal from "@/Components/Modal/Modal";
@@ -62,7 +63,7 @@ export default function DashboardToolPanel({ selected }: ToolPanelProps) {
                     disabled={!selected && !tobeDeleted}
                     onClick={deleteClick}
                 >
-                    Delete Folder
+                    Delete Folder<BsFillTrashFill />
                 </Button>
             </div>
             <Modal _ref={dialogRef}>

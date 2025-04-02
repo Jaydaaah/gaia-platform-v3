@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/dashboard', DashboardController::class)->names('dashboard');
+    Route::resource('/file-upload', FileUploadController::class)->names('file-upload');
 });
 
 Route::middleware('auth')->group(function () {
