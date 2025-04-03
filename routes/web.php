@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ProfileController;
@@ -19,6 +20,8 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/dashboard', DashboardController::class)->names('dashboard');
     Route::resource('/file-upload', FileUploadController::class)->names('file-upload');
+
+    Route::resource('chat', ChatController::class)->names('chat');
 });
 
 Route::middleware('auth')->group(function () {

@@ -26,7 +26,7 @@ export default function ModalLayout({ children }: PropsWithChildren) {
                 className="h-screen w-screen bg-black/30"
                 onClick={() => window.history.back()}
             ></div>
-            <main className="top-20 absolute w-full bg-base-100 max-w-5xl p-5 rounded shadow">
+            <main className="top-20 absolute w-full bg-base-100 max-w-5xl p-5 rounded-badge shadow">
                 {children}
             </main>
         </div>

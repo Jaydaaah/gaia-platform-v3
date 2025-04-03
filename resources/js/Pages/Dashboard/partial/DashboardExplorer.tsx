@@ -94,6 +94,9 @@ export default function DashboardExplorer({
                             title={name}
                             onFocus={onFocus(id, "examfile")}
                             onBlur={onBlur(id, "examfile")}
+                            onDoubleClick={() => {
+                                router.visit(route("chat.show", id));
+                            }}
                         />
                     ))}
                 </div>
