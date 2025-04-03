@@ -7,4 +7,18 @@ export interface Folder {
     updated_at: string;
 }
 
-export interface FileExam {}
+export interface ExamFile {
+    created_at: string;
+    id: number;
+    name: string;
+    subject: string;
+    description: string;
+    updated_at: string;
+}
+export interface ExamContext {
+    created_at: string;
+    id: number;
+    content: string;
+    updated_at: string;
+}
+

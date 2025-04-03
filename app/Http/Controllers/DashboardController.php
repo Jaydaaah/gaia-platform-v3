@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ExamFile;
 use App\Models\Folder;
 use App\Models\User;
 use App\Trait\canDoToast;
@@ -21,7 +22,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard/Dashboard', [
             'hierarchy' => [],
-            'parent_id' => null,
+            'folder_id' => null,
             'folder_name' => null,
             'folders' => Inertia::defer(
                 fn() => $user ? $user
@@ -30,6 +31,12 @@ class DashboardController extends Controller
                     ->orderBy('name', 'asc')
                     ->get() : []
             ),
+            'files' => Inertia::defer(
+                fn() => ExamFile::whereDoesntHave('folders')
+                    ->where('owner_id', $user->id)
+                    ->orderBy('name', 'asc')
+                    ->get() ?? []
+            )
         ]);
     }
 
@@ -42,7 +49,7 @@ class DashboardController extends Controller
             'hierarchy' => Inertia::defer(
                 fn() => $folder->getFolderHierarchy()
             ),
-            'parent_id' => $folder->id,
+            'folder_id' => $folder->id,
             'folder_name' => $folder->name,
             'folders' => Inertia::defer(
                 fn() => $folder
@@ -51,6 +58,11 @@ class DashboardController extends Controller
                     ->orderBy('name', 'asc')
                     ->get()
             ),
+            'files' => Inertia::defer(
+                fn() => $folder->exam_files()
+                    ->orderBy('name', 'asc')
+                    ->get() ?? []
+            )
         ]);
     }
 
@@ -72,24 +84,38 @@ class DashboardController extends Controller
         $name = $request->input('name');
         $owner_id = Auth::id();
 
-        $created_folder = Folder::create([
+        Folder::create([
             'name' => $name,
             'parent_id' => $parent_id,
             'owner_id' => $owner_id
         ]);
 
-        return $this->sendToast($created_folder->id, 'success', 'Successfully created folder');
+        return $this->sendToast('success', 'Successfully created folder');
     }
 
-    public function destroy(int $folder_id)
+    public function destroy(int $dashboard, Request $request)
     {
-        $folder = Folder::findOrFail($folder_id);
+        $request->validate([
+            'type' => 'required|in:folder,examfile'
+        ]);
+
         $user = User::find(Auth::id());
 
-        abort_unless($folder->owner_id == $user->id, 403);
+        $type = $request->input('type');
 
-        $folder->delete();
+        if ($type == 'folder') {
+            $folder = Folder::findOrFail($dashboard);
 
-        return $this->sendToast($folder->id, 'warning', 'Successfully deleted target folder');
+            abort_unless($folder->owner_id == $user->id, 403);
+            $folder->delete();
+            return $this->sendToast('warning', 'Successfully deleted target folder');
+        } else if ($type == 'examfile') {
+            $examFile = ExamFile::findOrFail($dashboard);
+            abort_unless($examFile->owner_id == $user->id, 403);
+            $examFile->delete();
+            return $this->sendToast('warning', 'Successfully deleted target file');
+        }
+
+        return $this->sendToast('error', 'No type deleted');
     }
 }

@@ -9,7 +9,10 @@ import Button from "@/Components/Button/Button";
 import DashboardUpload from "./partial/DashboardUpload";
 
 export default function Dashboard() {
-    const [selected, setSelected] = useState<number | null>(null);
+    const [selected, setSelected] = useState<{
+        dashboard: number;
+        type: "folder" | "examfile";
+    } | null>(null);
 
     const {
         props: { folder_name },

@@ -2,31 +2,74 @@ import FileFolder from "@/Components/File/FileFolder";
 import Loading from "@/Components/Loading/Loading";
 import { Folder } from "@/types/Models";
 import { Deferred, router, usePage } from "@inertiajs/react";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import {
+    Dispatch,
+    FocusEvent,
+    SetStateAction,
+    useCallback,
+    useMemo,
+} from "react";
+import { DashboardPage } from "../types";
+import FileExam from "@/Components/File/FileExam";
 
 type DashboardExplorerProps = {
-    setSelected: Dispatch<SetStateAction<number | null>>;
+    setSelected: Dispatch<
+        SetStateAction<{
+            dashboard: number;
+            type: "folder" | "examfile";
+        } | null>
+    >;
 };
 export default function DashboardExplorer({
     setSelected,
 }: DashboardExplorerProps) {
     const {
-        props: { folders },
-    } = usePage();
+        props: { folders, files },
+    } = usePage<DashboardPage>();
 
     const folderItems = useMemo(() => {
-        if (Array.isArray(folders)) {
-            const items: Folder[] = [...folders];
-            return items;
-        }
-        const items: Folder[] = [];
-        return items;
+        return folders ?? [];
     }, [folders]);
+
+    const fileItems = useMemo(() => {
+        return files ?? [];
+    }, [files]);
+
+    const onFocus = useCallback(
+        (dashboard: number, type: "examfile" | "folder") => {
+            return ({ target }: FocusEvent<HTMLDivElement>) => {
+                setSelected({ dashboard, type });
+            };
+        },
+        []
+    );
+
+    const onBlur = useCallback(
+        (dashboard: number, type: "examfile" | "folder") => {
+            return ({ target }: FocusEvent<HTMLDivElement>) => {
+                setTimeout(
+                    () =>
+                        setSelected((prev) => {
+                            if (
+                                prev &&
+                                prev.dashboard == dashboard &&
+                                prev.type == type
+                            ) {
+                                return null;
+                            }
+                            return prev;
+                        }),
+                    300
+                );
+            };
+        },
+        []
+    );
 
     return (
         <div>
             <Deferred
-                data={["folders"]}
+                data={["folders", "files"]}
                 fallback={
                     <div className="flex items-center justify-center py-10">
                         <Loading className="text-info loading-lg" />
@@ -38,19 +81,19 @@ export default function DashboardExplorer({
                         <FileFolder
                             key={id}
                             title={name}
-                            onFocus={() => setSelected(id)}
-                            onBlur={() =>
-                                setTimeout(
-                                    () =>
-                                        setSelected((prev) =>
-                                            prev == id ? null : prev
-                                        ),
-                                    100
-                                )
-                            }
+                            onFocus={onFocus(id, "folder")}
+                            onBlur={onBlur(id, "folder")}
                             onDoubleClick={() => {
                                 router.visit(route("dashboard.show", id));
                             }}
+                        />
+                    ))}
+                    {fileItems.map(({ id, name }) => (
+                        <FileExam
+                            key={id}
+                            title={name}
+                            onFocus={onFocus(id, "examfile")}
+                            onBlur={onBlur(id, "examfile")}
                         />
                     ))}
                 </div>

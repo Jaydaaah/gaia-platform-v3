@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('folders', function (Blueprint $table) {
+        Schema::create('exam_contexts', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('parent_id')->nullable()->constrained('folders')->onDelete('cascade');
-            $table->softDeletes(); 
+            $table->string('filename');
+            $table->string('extension');
+            $table->longText('content');
+            $table->foreignId('exam_file_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('folders');
+        Schema::dropIfExists('exam_contexts');
     }
 };

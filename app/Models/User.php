@@ -51,6 +51,11 @@ class User extends Authenticatable
         return $this->hasMany(Folder::class, 'owner_id');
     }
 
+    public function owned_exam()
+    {
+        return $this->hasMany(ExamFile::class, 'owner_id');
+    }
+
     public function exam_files()
     {
         return $this->belongsToMany(ExamFile::class, 'users_exam_files');

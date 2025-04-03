@@ -1,8 +1,13 @@
 import Button from "@/Components/Button/Button";
-import { router, useForm } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { DashboardPage } from "../types";
 
 export default function DashboardUpload() {
+    const {
+        props: { folder_id },
+    } = usePage<DashboardPage>();
+
     const [file, setFile] = useState<File | null>(null);
 
     const fileRef = useRef<HTMLInputElement>(null);
@@ -10,9 +15,10 @@ export default function DashboardUpload() {
     useEffect(() => {
         if (file) {
             const formData = new FormData();
+            if (folder_id && !isNaN(folder_id)) {
+                formData.append("folder_id", `${folder_id}`);
+            }
             formData.append("upload", file);
-
-            console.log("Uploading file:", file.name);
 
             router.post(route("file-upload.store"), formData, {
                 onSuccess: () => {
@@ -23,7 +29,7 @@ export default function DashboardUpload() {
                 },
             });
         }
-    }, [file]);
+    }, [file, folder_id]);
 
     const onChange = useCallback(
         ({ target }: ChangeEvent<HTMLInputElement>) => {

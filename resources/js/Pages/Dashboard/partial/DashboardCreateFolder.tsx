@@ -6,6 +6,7 @@ import { useForm, usePage } from "@inertiajs/react";
 import Loading from "@/Components/Loading/Loading";
 import { useCallback } from "react";
 import { PageProps } from "@/types";
+import { DashboardPage } from "../types";
 
 export default function DashboardCreateFolder({
     dialogRef,
@@ -13,11 +14,11 @@ export default function DashboardCreateFolder({
     dialogRef: React.RefObject<HTMLDialogElement>;
 }) {
     const {
-        props: { parent_id },
-    } = usePage<PageProps<{ parent_id?: number }>>();
+        props: { folder_id },
+    } = usePage<PageProps<DashboardPage>>();
 
     const { data, setData, processing, post, errors } = useForm({
-        parent_id,
+        parent_id: folder_id,
         name: "",
     });
 
@@ -60,13 +61,14 @@ export default function DashboardCreateFolder({
                 </FieldSetLabel>
             )}
             <ModalAction>
-                <Button
-                    className="btn-ghost"
-                    onClick={() => dialogRef.current?.close()}
-                >
+                <Button type="reset" className="btn-ghost">
                     Cancel
                 </Button>
-                <Button className="btn-primary" disabled={processing}>
+                <Button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={processing}
+                >
                     {!processing ? "Submit" : <Loading />}
                 </Button>
             </ModalAction>

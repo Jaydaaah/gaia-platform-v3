@@ -1,9 +1,10 @@
 import { PageProps } from "@/types";
-import { Folder } from "@/types/Models";
+import { ExamFile, Folder } from "@/types/Models";
 
 export type DashboardPage = PageProps<{
     hierarchy: Folder[];
-    parent_id?: number;
+    folder_id?: number;
     folder_name?: string;
     folders?: Folder[];
+    files?: ExamFile[];
 }>;
