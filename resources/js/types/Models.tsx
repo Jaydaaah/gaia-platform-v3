@@ -22,3 +22,9 @@ export interface ExamContext {
     updated_at: string;
 }
 
+export interface Message {
+    is_gaia: boolean;
+    content: string;
+    created_at: string;
+    id: number;
+}

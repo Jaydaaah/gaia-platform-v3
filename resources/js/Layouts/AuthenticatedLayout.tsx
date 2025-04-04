@@ -8,6 +8,7 @@ import { Link, usePage } from "@inertiajs/react";
 import { PropsWithChildren, ReactNode, useState } from "react";
 import { Bounce, ToastContainer } from "react-toastify";
 import ToastProvider from "./partial/ToastProvider";
+import GAIALogo from "@/Components/GAIALogo";
 
 const app_name = import.meta.env.VITE_APP_NAME;
 
@@ -20,9 +21,18 @@ export default function Authenticated({
     return (
         <div className="min-h-screen bg-background">
             <ToastProvider />
+            <div className="fixed -z-10 grayscale -bottom-1/2 -right-1/6 opacity-15">
+                <GAIALogo className="w-[150vh]" />
+            </div>
             <nav className="navbar bg-base-100 shadow-xs">
                 <div className="flex-1">
-                    <a className="btn btn-ghost text-xl">{app_name} v3</a>
+                    <Link
+                        href={route("dashboard.index")}
+                        as="a"
+                        className="btn btn-ghost text-xl"
+                    >
+                        {app_name} v3
+                    </Link>
                 </div>
                 <div className="flex-none">
                     <ul className="menu menu-horizontal px-1">

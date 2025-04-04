@@ -32,4 +32,9 @@ class ExamFile extends Model
     {
         return $this->belongsToMany(User::class, 'users_exam_files');
     }
+
+    public function message()
+    {
+        return $this->hasMany(Message::class);
+    }
 }
