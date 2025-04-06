@@ -1,16 +1,16 @@
-import { funEmoji } from "@dicebear/collection";
+import { bottts } from "@dicebear/collection";
 import { createAvatar } from "@dicebear/core";
 import { ImgHTMLAttributes, useEffect, useMemo } from "react";
 
 interface AvatarProps {
     name: string;
 }
-export default function Avatar({
+export default function BotAvatar({
     name,
     ...props
 }: AvatarProps & ImgHTMLAttributes<HTMLImageElement>) {
     const srcLink = useMemo(() => {
-        const avatar = createAvatar(funEmoji, { seed: name });
+        const avatar = createAvatar(bottts, { seed: name });
         return avatar.toDataUri();
     }, [name]);
 

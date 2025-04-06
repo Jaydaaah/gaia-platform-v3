@@ -1,3 +1,4 @@
+import { MdNotes } from "react-icons/md"; 
 import {
     useState,
     useEffect,
@@ -9,13 +10,20 @@ import {
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import ChatBubble from "@/Components/Chat/ChatBubble";
 import ChatInput from "@/Components/Chat/ChatInput";
-import { Deferred, useForm, usePage, usePoll } from "@inertiajs/react";
+import { Deferred, router, useForm, usePage, usePoll } from "@inertiajs/react";
 import { ChatPageProps } from "./types";
 import Loading from "@/Components/Loading/Loading";
+import PDFView from "./partial/PDFView";
+import GAIAContainer from "./partial/GAIAContainer";
+import Dropdown from "@/Components/Dropdown/Dropdown";
+import DropdownContent from "@/Components/Dropdown/DropdownContent";
+import NotesSection from "./partial/NotesSection";
+import GAIABubble from "./partial/GAIABubble";
 
 function getAvatarUrl(name: string): string {
     const encodedName = encodeURIComponent(name.trim());
-    return `https://ui-avatars.com/api/?name=${encodedName}`;
+    // return `https://ui-avatars.com/api/?name=${encodedName}`;
+    return `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${encodedName}`;
 }
 
 const gaiaSrc = "https://api.dicebear.com/9.x/bottts/svg?seed=Felix";
@@ -26,6 +34,8 @@ export default function ChatPage() {
     } = usePage<ChatPageProps>();
 
     const { start, stop } = usePoll(1000, { only: ["messages"] });
+
+    const [moveAside, setMoveAside] = useState(false);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -77,67 +87,76 @@ export default function ChatPage() {
 
     return (
         <Authenticated>
-            <div className="flex flex-col items-center">
-                <div className="w-full max-w-7xl flex flex-col h-full relative">
-                    <div className="absolute -z-10 backdrop-blur-md bg-base-200 h-screen w-full"></div>
-                    {/* Header */}
-                    <div className="p-4 rounded-box bg-primary text-primary-content flex justify-between items-center">
-                        <h1 className="text-lg font-bold">Chat Room</h1>
-                        <button
-                            className="btn btn-sm btn-error"
-                            onClick={() => window.history.back()}
-                        >
-                            Leave Chat
-                        </button>
-                    </div>
-
-                    {/* Topic Title */}
-
-                    {/* Chat Messages */}
-                    <div className="flex-1 max-h-[100vh] overflow-y-auto p-4 space-y-3 flex flex-col-reverse">
-                        <div ref={chatEndRef} />
-                        {/* chat here */}
-                        <>
-                            {messages.map(
-                                ({
-                                    id,
-                                    content,
-                                    src,
-                                    is_gaia,
-                                    sender,
-                                    created_at,
-                                }) => (
-                                    <ChatBubble
-                                        key={id}
-                                        src={src}
-                                        side={is_gaia ? "start" : "end"}
-                                        sender={sender}
-                                        time={created_at}
-                                    >
-                                        {content}
-                                    </ChatBubble>
-                                )
-                            )}
-                        </>
-
-                        <div className="p-4 my-4 w-fit mx-auto">
-                            <h2 className="text-2xl font-semibold">
-                                Topic: {subject}
-                            </h2>
+            {/* Topic Title */}
+            <div className="p-4 my-2 w-full mx-auto relative">
+                <h2 className="text-2xl font-semibold text-center">
+                    Topic: {subject}
+                </h2>
+                <NotesSection/>
+            </div>
+            <div className="h-full flex flex-row-reverse gap-5">
+                <div className="w-2/5 xl:w-1/3 flex flex-col px-2">
+                    <div className="flex-grow w-full max-w-7xl flex flex-col">
+                        {/* Header */}
+                        <div className="p-4 rounded-box bg-primary text-primary-content flex justify-between items-center">
+                            <h1 className="text-lg font-bold">Chat Room</h1>
+                            <button
+                                className="btn btn-sm btn-error"
+                                onClick={() =>
+                                    router.visit(route("dashboard.index"))
+                                }
+                            >
+                                Leave Chat
+                            </button>
                         </div>
-                    </div>
 
-                    {/* Chat Input */}
-                    <form onSubmit={onSubmit}>
-                        <ChatInput
-                            onChange={({ target }) =>
-                                setData("content", target.value)
-                            }
-                            value={data.content}
-                            error={errors.content}
-                            processing={processing}
-                        />
-                    </form>
+                        {/* Chat Messages */}
+                        <div className="flex-grow h-0 overflow-y-auto p-4 space-y-3 flex flex-col-reverse bg-base-100/50">
+                            <div ref={chatEndRef} />
+                            {/* chat here */}
+                            <>
+                                {messages.map(
+                                    ({
+                                        id,
+                                        content,
+                                        src,
+                                        is_gaia,
+                                        sender,
+                                        created_at,
+                                    }) => (
+                                        <ChatBubble
+                                            key={id}
+                                            src={src}
+                                            side={is_gaia ? "start" : "end"}
+                                            sender={sender}
+                                            time={created_at}
+                                        >
+                                            {content}
+                                        </ChatBubble>
+                                    )
+                                )}
+                            </>
+                        </div>
+
+                        {/* Chat Input */}
+                        <form onSubmit={onSubmit}>
+                            <ChatInput
+                                onChange={({ target }) =>
+                                    setData("content", target.value)
+                                }
+                                value={data.content}
+                                error={errors.content}
+                                processing={processing}
+                            />
+                        </form>
+                    </div>
+                </div>
+
+                <div className="w-1/2 h-full mx-auto overflow-hidden">
+                    <GAIAContainer moveAside={moveAside}>
+                        <GAIABubble moveAside={moveAside} />
+                    </GAIAContainer>
+                    <PDFView onToggle={(show) => setMoveAside(show)} />
                 </div>
             </div>
         </Authenticated>

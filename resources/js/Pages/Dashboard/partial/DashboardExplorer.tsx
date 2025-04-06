@@ -67,7 +67,7 @@ export default function DashboardExplorer({
     );
 
     return (
-        <div>
+        <div className="">
             <Deferred
                 data={["folders", "files"]}
                 fallback={

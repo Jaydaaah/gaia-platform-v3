@@ -28,7 +28,7 @@ export default function Dashboard() {
         >
             <Head title="Dashboard" />
 
-            <div className="p-6 sm:max-w-4xl sm:mx-auto">
+            <div className="p-6 w-full sm:max-w-4xl sm:mx-auto">
                 <div className="flex justify-between">
                     <h2 className="text-xl font-semibold">
                         {folder_name ?? "File Manager"}

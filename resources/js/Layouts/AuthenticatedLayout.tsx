@@ -19,23 +19,26 @@ export default function Authenticated({
     const user = usePage().props.auth.user;
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="h-screen bg-background flex flex-col">
+            <div className="sm:hidden fixed w-screen h-screen bg-base-300 z-50 flex justify-center items-center">
+                Sorry but, Mobile version is not supported yet
+            </div>
             <ToastProvider />
-            <div className="fixed -z-10 grayscale -bottom-1/2 -right-1/6 opacity-15">
-                <GAIALogo className="w-[150vh]" />
+            <div className="fixed -z-10 grayscale -bottom-1/2 -right-1/3 xl:-right-1/6 opacity-15">
+                <GAIALogo className="w-[100vh] sm:w-[130vh] 2xl:w-[150vh]" />
             </div>
             <nav className="navbar bg-base-100 shadow-xs">
                 <div className="flex-1">
                     <Link
                         href={route("dashboard.index")}
                         as="a"
-                        className="btn btn-ghost text-xl"
+                        className="btn btn-ghost text-sm sm:text-xl"
                     >
                         {app_name} v3
                     </Link>
                 </div>
                 <div className="flex-none">
-                    <ul className="menu menu-horizontal px-1">
+                    {/* <ul className="menu menu-horizontal px-1">
                         <li>
                             <a>Link</a>
                         </li>
@@ -52,7 +55,7 @@ export default function Authenticated({
                                 </ul>
                             </details>
                         </li>
-                    </ul>
+                    </ul> */}
                     <ThemeController />
                     <div className="dropdown dropdown-end">
                         <div
@@ -92,7 +95,7 @@ export default function Authenticated({
                 </header>
             )}
 
-            <main>{children}</main>
+            <main className="flex-grow flex flex-col">{children}</main>
         </div>
     );
 }

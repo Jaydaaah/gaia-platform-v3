@@ -8,7 +8,7 @@ class ExamContext extends Model
 {
     protected $table = 'exam_contexts';
 
-    protected $fillable = ['content', 'extension', 'filename', 'exam_file_id'];
+    protected $fillable = ['content', 'extension', 'filename', 'path', 'exam_file_id'];
 
     public function ExamFile()
     {

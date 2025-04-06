@@ -28,3 +28,9 @@ export interface Message {
     created_at: string;
     id: number;
 }
+
+export interface ExamNotes {
+    content: string;
+    exam_file_id: number;
+    owner_id: number;
+}

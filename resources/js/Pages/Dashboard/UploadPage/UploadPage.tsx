@@ -5,9 +5,10 @@ import FieldSetLabel from "@/Components/FieldSet/FieldSetLabel";
 import Field from "@/Components/FieldSet/Field";
 import FieldSetLegend from "@/Components/FieldSet/FieldSetLegend";
 import Button from "@/Components/Button/Button";
-import { FormEvent, useCallback } from "react";
+import { FormEvent, useCallback, useMemo, useState } from "react";
 import FieldArea from "@/Components/FieldSet/FieldArea";
 import Loading from "@/Components/Loading/Loading";
+import BotAvatar from "@/Components/Avatar/BotAvatar";
 
 export default function UploadPage() {
     const {
@@ -16,10 +17,13 @@ export default function UploadPage() {
 
     const { data, setData, processing, errors, patch } = useForm({
         folder_id,
+        bot_name: "",
         name: filename ?? "",
         subject: "",
         description: "",
     });
+
+    const [botName, setBotName] = useState("");
 
     const onSubmit = useCallback(
         (event: FormEvent<HTMLFormElement>) => {
@@ -34,6 +38,7 @@ export default function UploadPage() {
             setData({
                 folder_id: null,
                 name: filename,
+                bot_name: "",
                 subject: "",
                 description: "",
             });
@@ -50,19 +55,44 @@ export default function UploadPage() {
                 onSubmit={onSubmit}
                 onReset={onReset}
             >
-                <div>
-                    <FieldSetLegend>Filename</FieldSetLegend>
-                    <Field className="w-full" value={filename} readOnly />
+                <div className="flex gap-4">
+                    <div className="w-1/2">
+                        <FieldSetLegend>Filename</FieldSetLegend>
+                        <Field className="w-full" value={filename} readOnly />
+                    </div>
+                    <div className="w-1/2">
+                        <FieldSetLegend>Discussion Name</FieldSetLegend>
+                        <Field
+                            className="w-full"
+                            value={data.name}
+                            onChange={({ target }) =>
+                                setData("name", target.value)
+                            }
+                        />
+                        <FieldSetLabel className="text-error">
+                            {errors.name}
+                        </FieldSetLabel>
+                    </div>
                 </div>
-                <div>
-                    <FieldSetLegend>Discussion Name</FieldSetLegend>
+                <br />
+                <div className="flex flex-col items-center">
+                    <div className="p-4 rounded-full bg-neutral">
+                        <BotAvatar
+                            className="w-16 md:w-32"
+                            name={botName.length ? botName : "Sara"}
+                        />
+                    </div>
+                    <FieldSetLegend>Bot Name</FieldSetLegend>
                     <Field
-                        className="w-full"
-                        value={data.name}
-                        onChange={({ target }) => setData("name", target.value)}
+                        className="max-w-sm text-center"
+                        value={data.bot_name}
+                        onChange={({ target }) =>
+                            setData("bot_name", target.value)
+                        }
+                        onBlur={({ target }) => setBotName(target.value)}
                     />
                     <FieldSetLabel className="text-error">
-                        {errors.name}
+                        {errors.bot_name}
                     </FieldSetLabel>
                 </div>
                 <div>
@@ -82,7 +112,7 @@ export default function UploadPage() {
                     <FieldSetLegend>Description</FieldSetLegend>
                     <FieldArea
                         minLength={3}
-                        className="w-full"
+                        className="w-full min-h-32"
                         value={data.description}
                         onChange={({ target }) =>
                             setData("description", target.value)

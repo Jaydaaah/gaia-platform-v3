@@ -15,6 +15,13 @@ class FileUploadController extends Controller
 {
     use canDoToast;
 
+    public function download(int $exam_id)
+    {
+        $examFile = ExamFile::findOrFail($exam_id);
+        $path = storage_path('app/private/' . $examFile->context->path);
+
+        return response()->file($path);
+    }
 
     public function store(Request $request)
     {
@@ -39,12 +46,15 @@ class FileUploadController extends Controller
             $text = preg_replace('/[^\PC\s]/u', '', $text);
         }
 
+        $upload_path = $file->store('pdfs');
+
         abort_if(!$text, 400);
 
         $examContext = ExamContext::create([
             'content' => $text,
             'extension' => $file->getClientOriginalExtension(),
-            'filename' => $file->getClientOriginalName()
+            'filename' => $file->getClientOriginalName(),
+            'path' => $upload_path
         ]);
 
         $examContext->save();
@@ -77,6 +87,7 @@ class FileUploadController extends Controller
         $request->validate([
             'folder_id' => 'nullable|exists:folders,id',
             'name' => 'required|min:3|max:100',
+            'bot_name' => 'required|min:3|max:16',
             'subject' => 'required|min:3|max:120',
             'description' => 'required|min:3|max:1000'
         ]);
@@ -84,6 +95,7 @@ class FileUploadController extends Controller
         $examContext = ExamContext::findOrFail($exam_context_id);
 
         $name = $request->input('name');
+        $bot_name = $request->input('bot_name');
         $subject = $request->input('subject');
         $description = $request->input('description');
         $user_id = Auth::id();
@@ -95,13 +107,18 @@ class FileUploadController extends Controller
             'description' => $description,
             'owner_id' => $user_id
         ]);
+
+        $examFile->exam_bot()->create([
+            'name' => $bot_name
+        ]);
+
         $examContext->exam_file_id = $examFile->id;
 
         if ($folder_id) {
             $folder = Folder::findOrFail($folder_id);
             $folder->exam_files()->attach($examFile->id);
         }
-        
+
         $examContext->save();
 
         return redirect()->to(route('dashboard.index'))->with('toast', $this->withToast('success', 'Successfully uploaded file'));

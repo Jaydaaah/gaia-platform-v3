@@ -37,4 +37,14 @@ class ExamFile extends Model
     {
         return $this->hasMany(Message::class);
     }
+
+    public function notes()
+    {
+        return $this->hasMany(ExamNotes::class, 'exam_file_id');
+    }
+
+    public function exam_bot()
+    {
+        return $this->hasOne(ExamBot::class, 'exam_file_id');
+    }
 }

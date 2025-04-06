@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ExamFile;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -15,14 +16,17 @@ class ChatController extends Controller
     {
         $examFile = ExamFile::findOrFail($id);
 
+        $user = User::find(Auth::id());
+
         return Inertia::render('Chat/ChatPage', [
             'exam_file' => $examFile,
+            'bot_name' => $examFile->exam_bot->name,
             'messages' => Message::with('sender')
                 ->where('exam_file_id', $examFile->id)
                 ->orderBy('created_at', 'desc')
-                ->paginate(7)
-                ->items()
-
+                ->paginate(10)
+                ->items(),
+            'note' => Inertia::defer(fn() => $user->notes()->where('exam_file_id', $examFile->id)->first())
         ]);
     }
 

@@ -21,7 +21,7 @@ export default function ChatBubble({
     }, [time]);
 
     return (
-        <div className={`chat ${side == "end" ? "chat-end" : "chat-start"}`}>
+        <div className={`chat ${side == "end" ? "chat-start" : "chat-start"}`}>
             <div className="chat-image avatar">
                 <div className="w-10 rounded-full">
                     <img src={src} alt={sender} />

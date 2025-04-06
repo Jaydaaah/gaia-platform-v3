@@ -12,7 +12,7 @@ export default function ChatInput({
     ...props
 }: ChatInputProps & InputHTMLAttributes<HTMLInputElement>) {
     return (
-        <div className="p-4 bg-base-300 fixed bottom-0 w-full max-w-7xl">
+        <div className="p-4 bg-base-300 w-full max-w-7xl">
             <div className="flex items-center space-x-4">
                 <input
                     {...props}

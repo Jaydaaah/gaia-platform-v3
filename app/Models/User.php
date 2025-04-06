@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(ExamFile::class, 'users_exam_files');
     }
+
+    public function notes()
+    {
+        return $this->hasMany(ExamNotes::class, 'owner_id');
+    }
 }

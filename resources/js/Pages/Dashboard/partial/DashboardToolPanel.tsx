@@ -67,7 +67,7 @@ export default function DashboardToolPanel({ selected }: ToolPanelProps) {
                     disabled={!selected}
                     onClick={deleteClick}
                 >
-                    Delete Folder
+                    Delete
                     <BsFillTrashFill />
                 </Button>
             </div>
