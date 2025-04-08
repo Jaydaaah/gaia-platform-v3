@@ -9,3 +9,8 @@ export type Color =
     | "error";
 
 export type Size = "xs" | "sm" | "md" | "lg" | "xl";
+
+export type UserMessageSent = {
+    exam_file_id: number;
+    sender_id: number;
+}

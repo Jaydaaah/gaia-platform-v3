@@ -1,4 +1,4 @@
-import { MdNotes } from "react-icons/md"; 
+import { MdNotes } from "react-icons/md";
 import {
     useState,
     useEffect,
@@ -10,15 +10,14 @@ import {
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import ChatBubble from "@/Components/Chat/ChatBubble";
 import ChatInput from "@/Components/Chat/ChatInput";
-import { Deferred, router, useForm, usePage, usePoll } from "@inertiajs/react";
+import { Deferred, router, useForm, usePage } from "@inertiajs/react";
 import { ChatPageProps } from "./types";
-import Loading from "@/Components/Loading/Loading";
 import PDFView from "./partial/PDFView";
 import GAIAContainer from "./partial/GAIAContainer";
-import Dropdown from "@/Components/Dropdown/Dropdown";
-import DropdownContent from "@/Components/Dropdown/DropdownContent";
 import NotesSection from "./partial/NotesSection";
 import GAIABubble from "./partial/GAIABubble";
+import echo from "@/echo";
+import { UserMessageSent } from "@/types/Types";
 
 function getAvatarUrl(name: string): string {
     const encodedName = encodeURIComponent(name.trim());
@@ -30,10 +29,12 @@ const gaiaSrc = "https://api.dicebear.com/9.x/bottts/svg?seed=Felix";
 
 export default function ChatPage() {
     const {
-        props: { exam_file, messages: message_raw },
+        props: {
+            exam_file,
+            messages: message_raw,
+            auth: { user },
+        },
     } = usePage<ChatPageProps>();
-
-    const { start, stop } = usePoll(1000, { only: ["messages"] });
 
     const [moveAside, setMoveAside] = useState(false);
 
@@ -45,8 +46,9 @@ export default function ChatPage() {
 
     const messages = useMemo(() => {
         if (Array.isArray(message_raw)) {
-            return message_raw.map(
-                ({ id, sender, created_at, content, is_gaia }) => {
+            return message_raw
+                .filter(({ is_gaia }) => !is_gaia)
+                .map(({ id, sender, created_at, content, is_gaia }) => {
                     return {
                         id,
                         is_gaia,
@@ -55,8 +57,7 @@ export default function ChatPage() {
                         created_at,
                         sender: sender.name,
                     };
-                }
-            );
+                });
         }
         return [];
     }, [message_raw]);
@@ -64,14 +65,6 @@ export default function ChatPage() {
     const { data, setData, processing, errors, patch } = useForm({
         content: "",
     });
-
-    useEffect(() => {
-        if (processing) {
-            stop();
-        } else {
-            start();
-        }
-    }, [processing]);
 
     const onSubmit = useCallback(
         (event: FormEvent<HTMLFormElement>) => {
@@ -85,6 +78,23 @@ export default function ChatPage() {
         [patch, exam_id]
     );
 
+    useEffect(() => {
+        const channel = echo.private(`chat-window.${exam_id}`);
+        channel.listen(
+            "UserMessageSent",
+            ({ exam_file_id, sender_id }: UserMessageSent) => {
+                if (exam_file_id == exam_id && user.id != sender_id) {
+                    router.reload({
+                        only: ["messages"],
+                    });
+                }
+            }
+        );
+        return () => {
+            channel.stopListening("UserMessageSent");
+        };
+    }, [exam_id, user]);
+
     return (
         <Authenticated>
             {/* Topic Title */}
@@ -92,7 +102,7 @@ export default function ChatPage() {
                 <h2 className="text-2xl font-semibold text-center">
                     Topic: {subject}
                 </h2>
-                <NotesSection/>
+                <NotesSection />
             </div>
             <div className="h-full flex flex-row-reverse gap-5">
                 <div className="w-2/5 xl:w-1/3 flex flex-col px-2">
