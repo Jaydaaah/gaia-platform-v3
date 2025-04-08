@@ -6,6 +6,8 @@ use App\Events\UserMessageSent;
 use App\Models\ExamFile;
 use App\Models\Message;
 use App\Models\User;
+use Gemini\Enums\ModelType;
+use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -18,6 +20,8 @@ class ChatController extends Controller
         $examFile = ExamFile::findOrFail($id);
 
         $user = User::find(Auth::id());
+        // $result = Gemini::generativeModel('models/gemini-1.5-flash')->generateContent('Hello');
+        // $text = $result->text();
 
         return Inertia::render('Chat/ChatPage', [
             'exam_file' => $examFile,
