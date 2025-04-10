@@ -1,17 +1,17 @@
 import { format } from "date-fns";
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren, ReactNode, useMemo } from "react";
 
 interface ChatBubbleProps {
     sender: string;
     side: "start" | "end";
-    src: string;
+    avatarNode: ReactNode;
     time: string;
 }
 export default function ChatBubble({
     children,
     sender,
     side,
-    src,
+    avatarNode,
     time,
 }: PropsWithChildren<ChatBubbleProps>) {
     const formattedTime = useMemo(() => {
@@ -23,9 +23,7 @@ export default function ChatBubble({
     return (
         <div className={`chat ${side == "end" ? "chat-start" : "chat-start"}`}>
             <div className="chat-image avatar">
-                <div className="w-10 rounded-full">
-                    <img src={src} alt={sender} />
-                </div>
+                <div className="w-10 rounded-full">{avatarNode}</div>
             </div>
             <div className="chat-header">
                 {sender}{" "}

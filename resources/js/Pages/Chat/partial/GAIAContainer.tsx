@@ -21,11 +21,9 @@ export default function GAIAContainer({
         const viewportHeight = window.innerHeight;
 
         const distanceToBottom = viewportHeight - rect.top - (rect.height + 30);
-        const distanceToLeft = rect.left * -2;
 
         divAnimate.start({
             y: !moveAside ? 0 : distanceToBottom,
-            x: !moveAside ? 0 : distanceToLeft,
             scale: !moveAside ? 1.2 : 1,
         });
     }, [moveAside]);

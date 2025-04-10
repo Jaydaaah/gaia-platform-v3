@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('exam_file_id')->constrained()->onDelete('cascade');
-            $table->foreignId('sender_id')->constrained('users')->nullable()->onDelete('cascade');
+            $table->foreignId('sender_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->boolean('is_gaia');
             $table->text('content');
             $table->timestamps();

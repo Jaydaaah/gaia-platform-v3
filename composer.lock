@@ -4,8 +4,52 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1aa85e894904ab4bce4d250ee7a414df",
+    "content-hash": "a3054a4ff2ced1fd1f8f2b1fe3acd2c6",
     "packages": [
+        {
+            "name": "afaya/edge-tts",
+            "version": "1.2.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/andresayac/edge-tts-php.git",
+                "reference": "13317adad22577413ea79ba5e0c70f443503b3a5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/andresayac/edge-tts-php/zipball/13317adad22577413ea79ba5e0c70f443503b3a5",
+                "reference": "13317adad22577413ea79ba5e0c70f443503b3a5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "ramsey/uuid": "^4.7",
+                "ratchet/pawl": "^0.4.1",
+                "react/event-loop": "^1.5",
+                "symfony/console": "^6.4 || ^7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.6"
+            },
+            "bin": [
+                "src/Cli/edge-tts"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Afaya\\EdgeTTS\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0+"
+            ],
+            "description": "Edge TTS is a PHP package that allows access to the online text-to-speech service used by Microsoft Edge without the need for Microsoft Edge, Windows, or an API key.",
+            "support": {
+                "issues": "https://github.com/andresayac/edge-tts-php/issues",
+                "source": "https://github.com/andresayac/edge-tts-php/tree/v1.2.9"
+            },
+            "time": "2024-10-16T15:30:51+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.12.3",
@@ -4044,6 +4088,60 @@
                 }
             ],
             "time": "2024-04-27T21:32:50+00:00"
+        },
+        {
+            "name": "ratchet/pawl",
+            "version": "v0.4.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ratchetphp/Pawl.git",
+                "reference": "2c582373c78271de32cb04c755c4c0db7e09c9c0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ratchetphp/Pawl/zipball/2c582373c78271de32cb04c755c4c0db7e09c9c0",
+                "reference": "2c582373c78271de32cb04c755c4c0db7e09c9c0",
+                "shasum": ""
+            },
+            "require": {
+                "evenement/evenement": "^3.0 || ^2.0",
+                "guzzlehttp/psr7": "^2.0",
+                "php": ">=7.4",
+                "ratchet/rfc6455": "^0.3.1 || ^0.4.0",
+                "react/socket": "^1.9"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8"
+            },
+            "suggest": {
+                "reactivex/rxphp": "~2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions_include.php"
+                ],
+                "psr-4": {
+                    "Ratchet\\Client\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Asynchronous WebSocket client",
+            "keywords": [
+                "Ratchet",
+                "async",
+                "client",
+                "websocket",
+                "websocket client"
+            ],
+            "support": {
+                "issues": "https://github.com/ratchetphp/Pawl/issues",
+                "source": "https://github.com/ratchetphp/Pawl/tree/v0.4.3"
+            },
+            "time": "2025-03-19T16:47:38+00:00"
         },
         {
             "name": "ratchet/rfc6455",
