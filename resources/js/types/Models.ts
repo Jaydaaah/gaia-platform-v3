@@ -19,6 +19,7 @@ export interface ExamContext {
     created_at: string;
     id: number;
     content: string;
+    instruction: string;
     updated_at: string;
 }
 

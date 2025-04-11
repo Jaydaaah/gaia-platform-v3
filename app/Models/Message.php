@@ -8,7 +8,7 @@ class Message extends Model
 {
     protected $table = 'messages';
 
-    protected $fillable = ['exam_file_id', 'sender_id', 'is_gaia', 'content'];
+    protected $fillable = ['exam_file_id', 'sender_id', 'is_gaia', 'content', 'responded'];
 
     public function exam_file()
     {

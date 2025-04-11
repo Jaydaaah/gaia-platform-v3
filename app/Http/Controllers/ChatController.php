@@ -26,14 +26,22 @@ class ChatController extends Controller
         // $result = Gemini::generativeModel('models/gemini-1.5-flash')->generateContent('Hello');
         // $text = $result->text();
 
+        $bot_name = $examFile->exam_bot->name;
+        $subject = $examFile->subject;
+        $bot_last_message_content = "Hello Students, I am $bot_name \nOur topic for today is '$subject'";
+        $bot_last_message = Message::where('exam_file_id', $examFile->id)
+            ->where('is_gaia', true)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($bot_last_message) {
+            $bot_last_message_content = $bot_last_message->content;
+        }
+
         return Inertia::render('Chat/ChatPage', [
             'exam_file' => $examFile,
-            'bot_name' => $examFile->exam_bot->name,
-            'bot_last_message_content' => Message::where('exam_file_id', $examFile->id)
-                ->where('is_gaia', true)
-                ->orderBy('created_at', 'desc')
-                ->first()
-                ->content,
+            'bot_name' => $bot_name,
+            'bot_last_message_content' => $bot_last_message_content,
             'messages' => Message::with('sender')
                 ->where('exam_file_id', $examFile->id)
                 ->where('is_gaia', false)
@@ -59,7 +67,8 @@ class ChatController extends Controller
             'exam_file_id' => $examFile->id,
             'sender_id' => $sender_id,
             'is_gaia' => false,
-            'content' => $content
+            'content' => $content,
+            'responded' => false
         ]);
 
         broadcast(new UserMessageSent($examFile->id, $sender_id));

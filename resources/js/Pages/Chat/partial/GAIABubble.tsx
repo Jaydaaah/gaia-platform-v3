@@ -23,13 +23,23 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
     );
     const [text, setText] = useState(bot_last_message_content ?? "Hello");
 
-    const [finishSpeacking, setFinishSpeaking] = useState(false);
+    const [hasUnreadMsg, setHasUnreadMsg] = useState(true);
+
+    const textArray = useMemo(() => {
+        return text
+            .split("<b>")
+            .map((text) => text.replace("\n", "").trim())
+            .filter((text) => text.length > 0);
+    }, [text]);
+
+    const [textSelect, setTextSelect] = useState(0);
 
     const { Text, speechStatus, isInQueue, start, pause, stop } = useSpeech({
-        text,
+        text: textArray[textSelect],
         rate: 0.9,
         pitch: 0.8,
         voiceURI: "Google UK English Male",
+        autoPlay: true,
     });
 
     const [hide, setHide] = useState(false);
@@ -65,7 +75,8 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
             ({ exam_file_id, response }: GAIAResponse) => {
                 if (exam_id == exam_file_id) {
                     setText(response);
-                    setFinishSpeaking(false);
+                    setHasUnreadMsg(true);
+                    setTextSelect(0);
                     stop();
                 }
             }
@@ -76,14 +87,38 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
     }, [exam_id, stop]);
 
     useEffect(() => {
-        if (speechStatus == "stopped") {
-            setFinishSpeaking(true);
+        if (speechStatus == "started") {
+            setHasUnreadMsg(false);
         }
     }, [speechStatus]);
+
+    useEffect(() => {
+        if (speechStatus == "stopped" && !hasUnreadMsg) {
+            setTextSelect((prev) => {
+                const incremented = prev + 1;
+                if (textArray.length > incremented) {
+                    return incremented;
+                }
+                return prev;
+            });
+        }
+    }, [speechStatus, hasUnreadMsg, textArray]);
+
+    useEffect(() => {
+        console.log(textArray);
+    }, [textArray]);
+
+    useEffect(() => {
+        console.log(textArray[textSelect]);
+    }, [textSelect, textArray]);
 
     return (
         <div
             className={`chat chat-start md:text-base lg:text-lg xl:text-xl md:max-w-[50vw]`}
+            tabIndex={0}
+            onFocus={() =>
+                (!!hasUnreadMsg || textSelect + 1 < textArray.length) && start()
+            }
         >
             <div
                 className={`chat-image avatar ${
@@ -97,26 +132,22 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
                     <div className="w-full h-full bg-base-300" />
                 </div>
             </div>
-            {status != "listening" && (
-                <div
-                    tabIndex={0}
-                    onFocus={() => !finishSpeacking || start()}
-                    onClick={() => !!moveAside && setHide((prev) => !prev)}
-                    className={`chat-bubble max-h-72 overflow-y-auto select-none min-h-20 min-w-52 ${
-                        moveAside
-                            ? `${
-                                  hide
-                                      ? "opacity-20 -translate-x-[100%]"
-                                      : "opacity-75"
-                              }`
-                            : "hover:scale-[102%]s"
-                    } transition-all duration-500 ${
-                        status == "responded" ? "" : "skeleton opacity-50"
-                    }`}
-                >
-                    {status == "typing" ? "typing..." : Text()}
-                </div>
-            )}
+            <div
+                onClick={() => !!moveAside && setHide((prev) => !prev)}
+                className={`chat-bubble max-h-72 overflow-y-auto select-none min-h-20 min-w-52 ${
+                    moveAside
+                        ? `${
+                              hide
+                                  ? "opacity-20 -translate-x-[100%]"
+                                  : "opacity-75"
+                          }`
+                        : "hover:scale-[102%]s"
+                } transition-all duration-500 ${
+                    status == "responded" ? "" : "skeleton opacity-50"
+                }`}
+            >
+                {status == "typing" ? "typing..." : Text()}
+            </div>
         </div>
     );
 }

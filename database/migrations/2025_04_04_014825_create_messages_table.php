@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('exam_file_id')->constrained()->onDelete('cascade');
             $table->foreignId('sender_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->boolean('is_gaia');
+            $table->boolean('responded');
             $table->text('content');
             $table->timestamps();
         });

@@ -5,14 +5,18 @@ import FieldSetLabel from "@/Components/FieldSet/FieldSetLabel";
 import Field from "@/Components/FieldSet/Field";
 import FieldSetLegend from "@/Components/FieldSet/FieldSetLegend";
 import Button from "@/Components/Button/Button";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 import FieldArea from "@/Components/FieldSet/FieldArea";
 import Loading from "@/Components/Loading/Loading";
 import BotAvatar from "@/Components/Avatar/BotAvatar";
+import Modal from "@/Components/Modal/Modal";
+import ModalBox from "@/Components/Modal/ModalBox";
 
 export default function UploadPage() {
+    const modalRef = useRef<HTMLDialogElement>(null);
+
     const {
-        props: { folder_id, context_id, filename },
+        props: { folder_id, context, filename },
     } = usePage<UploadPageType>();
 
     const { data, setData, processing, errors, patch } = useForm({
@@ -28,9 +32,9 @@ export default function UploadPage() {
     const onSubmit = useCallback(
         (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            patch(route("file-upload.update", context_id));
+            patch(route("file-upload.update", context.id));
         },
-        [context_id, patch]
+        [context, patch]
     );
 
     const onReset = useCallback(
@@ -43,10 +47,12 @@ export default function UploadPage() {
                 description: "",
             });
             window.history.back();
-            router.delete(route("file-upload.destroy", context_id));
+            router.delete(route("file-upload.destroy", context.id));
         },
-        [context_id]
+        [context]
     );
+
+    console.log("context: ", context.instruction);
 
     return (
         <ModalLayout>
@@ -112,7 +118,7 @@ export default function UploadPage() {
                     <FieldSetLegend>Description</FieldSetLegend>
                     <FieldArea
                         minLength={3}
-                        className="w-full min-h-32"
+                        className="w-full min-h-24"
                         value={data.description}
                         onChange={({ target }) =>
                             setData("description", target.value)
@@ -121,6 +127,25 @@ export default function UploadPage() {
                     <FieldSetLabel className="text-error">
                         {errors.description}
                     </FieldSetLabel>
+                </div>
+
+                <div>
+                    <FieldSetLegend>Generated Instruction</FieldSetLegend>
+                    <Button
+                        type="button"
+                        onClick={() => modalRef.current?.showModal()}
+                    >
+                        View Code
+                    </Button>
+                    <Modal _ref={modalRef}>
+                        <div className="modal-box mockup-code w-full max-w-5xl h-[50vh] overflow-y-auto">
+                            {context.instruction.split("\n").map((line) => (
+                                <pre>
+                                    <code>{line}</code>
+                                </pre>
+                            ))}
+                        </div>
+                    </Modal>
                 </div>
                 <footer className="flex justify-end">
                     <Button type="submit" disabled={processing}>

@@ -12,7 +12,7 @@ import ChatInput from "@/Components/Chat/ChatInput";
 import { Deferred, router, useForm, usePage } from "@inertiajs/react";
 import { ChatPageProps } from "../types";
 import echo from "@/echo";
-import { UserMessageSent } from "@/types/Types";
+import { GAIAStatus, UserMessageSent } from "@/types/Types";
 import Avatar from "@/Components/Avatar/Avatar";
 
 export default function ChatFeed() {
@@ -51,6 +51,10 @@ export default function ChatFeed() {
         content: "",
     });
 
+    const [status, setStatus] = useState<"listening" | "typing" | "responded">(
+        "responded"
+    );
+
     const onSubmit = useCallback(
         (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
@@ -80,7 +84,20 @@ export default function ChatFeed() {
         };
     }, [exam_id, user]);
 
-    
+    useEffect(() => {
+        const channel = echo.private(`chat-window.${exam_id}`);
+        channel.listen("GAIAStatus", ({ exam_file_id, status }: GAIAStatus) => {
+            if (exam_id == exam_file_id) {
+                if (["listening", "typing", "responded"].includes(status)) {
+                    setStatus(status);
+                }
+            }
+        });
+        return () => {
+            channel.stopListening("UserMessageSent");
+        };
+    }, [exam_id]);
+
     return (
         <div className="flex-grow w-full max-w-7xl flex flex-col">
             {/* Header */}
@@ -122,6 +139,7 @@ export default function ChatFeed() {
                     value={data.content}
                     error={errors.content}
                     processing={processing}
+                    disabled={status == "typing"}
                 />
             </form>
         </div>

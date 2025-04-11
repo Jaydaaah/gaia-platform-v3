@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Instructions\GAIAInstruct;
 use App\Models\ExamContext;
 use App\Models\ExamFile;
 use App\Models\Folder;
 use App\Trait\canDoToast;
+use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -35,23 +37,32 @@ class FileUploadController extends Controller
 
         abort_if(!$file, 403);
 
-        $text = '';
+        $pdfText = '';
+        $instruction = '';
 
         if ($file->getClientOriginalExtension() === 'pdf') {
             $parser = new Parser();
             $pdf = $parser->parseFile($file->getPathname());
-            $text = $pdf->getText();
+            $pdfText = $pdf->getText();
 
-            $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
-            $text = preg_replace('/[^\PC\s]/u', '', $text);
+            $pdfText = mb_convert_encoding($pdfText, 'UTF-8', 'UTF-8');
+            $pdfText = preg_replace('/[^\PC\s]/u', '', $pdfText);
+
+            $instruction = GAIAInstruct::CONVERSION_INSTRUCTION;
+            $prompt = str_replace('[Insert PDF text here]', $pdfText, $instruction);
+
+            $model = Gemini::generativeModel('models/gemini-1.5-flash');
+            $response = $model->generateContent($prompt);
+            $instruction = $response->text();
         }
 
         $upload_path = $file->store('pdfs');
 
-        abort_if(!$text, 400);
+        abort_if(!$pdfText, 400);
 
         $examContext = ExamContext::create([
-            'content' => $text,
+            'content' => $pdfText,
+            'instruction' => $instruction,
             'extension' => $file->getClientOriginalExtension(),
             'filename' => $file->getClientOriginalName(),
             'path' => $upload_path
@@ -78,7 +89,7 @@ class FileUploadController extends Controller
         return Inertia::render('Dashboard/UploadPage/UploadPage', [
             'folder_id' => $folder_id,
             'filename' => $examContext->filename,
-            'context_id' => $examContext->id,
+            'context' => $examContext,
         ]);
     }
 

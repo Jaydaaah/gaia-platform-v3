@@ -9,6 +9,7 @@ interface ChatInputProps {
 export default function ChatInput({
     error,
     processing,
+    disabled,
     ...props
 }: ChatInputProps & InputHTMLAttributes<HTMLInputElement>) {
     return (
@@ -19,8 +20,9 @@ export default function ChatInput({
                     type="text"
                     className="input input-bordered input-primary w-full"
                     placeholder="Type a message..."
+                    disabled={processing || disabled}
                 />
-                <Button type="submit" disabled={processing}>
+                <Button type="submit" disabled={processing || disabled}>
                     Send
                 </Button>
             </div>

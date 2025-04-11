@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('extension');
             $table->string('path');
             $table->longText('content');
+            $table->longText('instruction');
             $table->foreignId('exam_file_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
