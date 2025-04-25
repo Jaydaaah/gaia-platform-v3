@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import BotAvatar from "@/Components/Avatar/BotAvatar";
 import { usePage } from "@inertiajs/react";
 import { ChatPageProps } from "../types";
 import echo from "@/echo";
 import { GAIAResponse, GAIAStatus } from "@/types/Types";
 import { useSpeech } from "react-text-to-speech";
+import { FaPlay, FaPause } from "react-icons/fa";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-interface GAIABubbleProps {
-    moveAside?: boolean;
-}
-export default function GAIABubble({ moveAside }: GAIABubbleProps) {
+export default function GAIABubble() {
     const {
         props: {
+            auth: { user },
             bot_name,
             bot_last_message_content,
             exam_file: { id: exam_id },
@@ -22,7 +22,6 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
         "responded"
     );
     const [text, setText] = useState(bot_last_message_content ?? "Hello");
-
     const [hasUnreadMsg, setHasUnreadMsg] = useState(true);
 
     const textArray = useMemo(() => {
@@ -34,33 +33,41 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
 
     const [textSelect, setTextSelect] = useState(0);
 
-    const { Text, speechStatus, isInQueue, start, pause, stop } = useSpeech({
+    const [autoPlay, setAutoPlay] = useState(false);
+
+    const { Text, speechStatus, start, pause, stop } = useSpeech({
         text: textArray[textSelect],
         rate: 0.9,
         pitch: 0.8,
         voiceURI: "Google UK English Male",
+        autoPlay,
     });
+
+    useEffect(() => {
+        setAutoPlay(true);
+    }, []);
 
     const botName = useMemo(() => {
         return bot_name.length ? bot_name : "Sara";
     }, [bot_name]);
 
     useEffect(() => {
-        const channel = echo.private(`chat-window.${exam_id}`);
+        const channel = echo.private(`chat-window.${exam_id}.${user.id}`);
         channel.listen("GAIAStatus", ({ exam_file_id, status }: GAIAStatus) => {
-            if (exam_id == exam_file_id) {
-                if (["listening", "typing", "responded"].includes(status)) {
-                    setStatus(status);
-                }
+            if (
+                exam_id == exam_file_id &&
+                ["listening", "typing", "responded"].includes(status)
+            ) {
+                setStatus(status);
             }
         });
         return () => {
-            channel.stopListening("UserMessageSent");
+            channel.stopListening("GAIAStatus");
         };
-    }, [exam_id]);
+    }, [exam_id, user]);
 
     useEffect(() => {
-        const channel = echo.private(`chat-window.${exam_id}`);
+        const channel = echo.private(`chat-window.${exam_id}.${user.id}`);
         channel.listen(
             "GAIAResponse",
             ({ exam_file_id, response }: GAIAResponse) => {
@@ -73,35 +80,42 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
             }
         );
         return () => {
-            channel.stopListening("UserMessageSent");
+            channel.stopListening("GAIAResponse");
         };
-    }, [exam_id, stop]);
+    }, [exam_id, user, stop]);
 
     useEffect(() => {
-        if (speechStatus == "started") {
+        if (speechStatus === "started") {
             setHasUnreadMsg(false);
         }
     }, [speechStatus]);
 
     useEffect(() => {
-        if (speechStatus == "stopped" && !hasUnreadMsg) {
+        if (speechStatus === "stopped" && !hasUnreadMsg) {
             setTextSelect((prev) => {
-                const incremented = prev + 1;
-                if (textArray.length > incremented) {
-                    return incremented;
-                }
-                return prev;
+                const next = prev + 1;
+                return next < textArray.length ? next : 0;
             });
         }
     }, [speechStatus, hasUnreadMsg, textArray]);
 
-    useEffect(() => {
-        console.log(textArray);
-    }, [textArray]);
+    const handleLeft = useCallback(() => {
+        stop();
+        setTextSelect((prev) => (prev === 0 ? textArray.length - 1 : prev - 1));
+    }, [stop]);
 
-    useEffect(() => {
-        console.log(textArray[textSelect]);
-    }, [textSelect, textArray]);
+    const handleRight = useCallback(() => {
+        stop();
+        setTextSelect((prev) => (prev + 1) % textArray.length);
+    }, [stop]);
+
+    const handlePlayPause = useCallback(() => {
+        if (speechStatus === "started") {
+            pause();
+        } else {
+            start();
+        }
+    }, [pause, start]);
 
     return (
         <div
@@ -125,10 +139,50 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
             </div>
             <div
                 className={`chat-bubble max-h-72 overflow-y-auto select-none min-h-20 min-w-52 transition-all duration-500 ${
-                    status == "responded" ? "" : "skeleton opacity-50"
+                    status === "responded" ? "" : "skeleton opacity-50"
                 }`}
             >
-                {status == "typing" ? "typing..." : Text()}
+                {status === "typing" ? (
+                    "typing..."
+                ) : (
+                    <>
+                        <div className="mb-2">{Text()}</div>
+                        <div className="flex items-center justify-center gap-3 mt-1">
+                            <button
+                                onClick={handleLeft}
+                                className="text-gray-500 hover:text-gray-800 transition"
+                                title="Previous"
+                            >
+                                <HiChevronLeft size={18} />
+                            </button>
+                            <button
+                                onClick={handlePlayPause}
+                                className="text-primary hover:text-primary/80 transition"
+                                title={
+                                    speechStatus === "started"
+                                        ? "Pause"
+                                        : "Play"
+                                }
+                            >
+                                {speechStatus === "started" ? (
+                                    <FaPause size={18} />
+                                ) : (
+                                    <FaPlay size={18} />
+                                )}
+                            </button>
+                            <button
+                                onClick={handleRight}
+                                className="text-gray-500 hover:text-gray-800 transition"
+                                title="Next"
+                            >
+                                <HiChevronRight size={18} />
+                            </button>
+                        </div>
+                        <div className="text-[10px] text-gray-400 text-center mt-1">
+                            Segment {textSelect + 1} / {textArray.length}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

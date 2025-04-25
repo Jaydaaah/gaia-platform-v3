@@ -17,7 +17,7 @@ class GAIAStatus implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $exam_file_id, public string $status)
+    public function __construct(public int $exam_file_id, public int $user_id, public string $status)
     {
         //
     }
@@ -29,6 +29,6 @@ class GAIAStatus implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [new PrivateChannel("chat-window.{$this->exam_file_id}")];
+        return [new PrivateChannel("chat-window.{$this->exam_file_id}.{$this->user_id}")];
     }
 }

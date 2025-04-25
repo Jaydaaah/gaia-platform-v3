@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamNoteController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ShareableController;
+use App\Http\Controllers\UnrealSpeechController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,6 +32,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('chat', ChatController::class)->names('chat');
     Route::resource('chat/notes', ExamNoteController::class)->names('chat.notes');
+    Route::resource('chat/share', ShareableController::class)->names('chat.share');
+
+    Route::post('/unreal-speech', [UnrealSpeechController::class, 'synthesize'])->name('speech.synthesize');
 });
 
 Route::middleware('auth')->group(function () {

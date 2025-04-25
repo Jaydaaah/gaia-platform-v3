@@ -15,6 +15,8 @@ import echo from "@/echo";
 import { GAIAStatus, UserMessageSent } from "@/types/Types";
 import Avatar from "@/Components/Avatar/Avatar";
 import ReplyNode from "../components/ReplyNode";
+import GAIABubble from "./GAIABubble";
+import BotAvatar from "@/Components/Avatar/BotAvatar";
 
 export default function ChatFeed() {
     const {
@@ -23,7 +25,7 @@ export default function ChatFeed() {
             messages,
             auth: { user },
             user_context,
-            read_only,
+            bot_name,
         },
     } = usePage<ChatPageProps>();
 
@@ -35,6 +37,7 @@ export default function ChatFeed() {
 
     const { data, setData, processing, errors, patch } = useForm({
         content: "",
+        user_context,
     });
 
     const [status, setStatus] = useState<"listening" | "typing" | "responded">(
@@ -46,7 +49,7 @@ export default function ChatFeed() {
             event.preventDefault();
             patch(route("chat.update", exam_id), {
                 onSuccess: () => {
-                    setData({ content: "" });
+                    setData("content", "");
                 },
             });
         },
@@ -58,7 +61,6 @@ export default function ChatFeed() {
         channel.listen(
             ".user.message.sent",
             ({ exam_file_id, sender_id }: UserMessageSent) => {
-                console.log("received message from: ", exam_file_id, sender_id);
                 if (exam_file_id == exam_id && user.id != sender_id) {
                     router.reload({
                         only: ["messages"],
@@ -72,18 +74,21 @@ export default function ChatFeed() {
     }, [exam_id, user]);
 
     useEffect(() => {
-        const channel = echo.private(`chat-window.${exam_id}`);
+        const channel = echo.private(`chat-window.${exam_id}.${user.id}`);
         channel.listen("GAIAStatus", ({ exam_file_id, status }: GAIAStatus) => {
             if (exam_id == exam_file_id) {
                 if (["listening", "typing", "responded"].includes(status)) {
                     setStatus(status);
+                    router.reload({
+                        only: ["messages"],
+                    });
                 }
             }
         });
         return () => {
             channel.stopListening("UserMessageSent");
         };
-    }, [exam_id]);
+    }, [exam_id, user]);
 
     return (
         <div className="flex-grow w-full max-w-7xl flex flex-col">
@@ -95,7 +100,11 @@ export default function ChatFeed() {
                         {!!user_context && (
                             <button
                                 className="btn btn-sm btn-warning"
-                                onClick={() => window.history.back()}
+                                onClick={() =>
+                                    router.visit(
+                                        route("chat.show", exam_file.id)
+                                    )
+                                }
                             >
                                 Go Back
                             </button>
@@ -129,7 +138,13 @@ export default function ChatFeed() {
                             reply_from,
                         }) => (
                             <ChatBubble
-                                avatarNode={<Avatar name={sender.name} />}
+                                avatarNode={
+                                    is_gaia ? (
+                                        <BotAvatar name={bot_name} />
+                                    ) : (
+                                        <Avatar name={sender?.name} />
+                                    )
+                                }
                                 footer={
                                     reply_from &&
                                     reply_from.length > 0 && (
@@ -145,10 +160,10 @@ export default function ChatFeed() {
                                         ? "start"
                                         : "end"
                                 }
-                                sender={sender.name}
+                                sender={!is_gaia ? sender?.name : bot_name}
                                 time={created_at}
                             >
-                                {content}
+                                {content.split("<b>").join("\n\n")}
                             </ChatBubble>
                         )
                     )}
@@ -162,7 +177,7 @@ export default function ChatFeed() {
                     value={data.content}
                     error={errors.content}
                     processing={processing}
-                    disabled={status == "typing" || read_only}
+                    disabled={status == "typing"}
                 />
             </form>
         </div>

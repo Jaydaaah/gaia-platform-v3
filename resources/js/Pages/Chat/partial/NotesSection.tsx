@@ -62,8 +62,14 @@ export default function NotesSection() {
             className="w-full h-full absolute"
             onSubmit={onSubmit}
         >
+            {read_only && note?.owner.name && (
+                <div className="text-sm text-gray-500 px-4 pt-2 pb-1">
+                    Notes from{" "}
+                    <span className="font-semibold">{note?.owner.name}</span>
+                </div>
+            )}
             <textarea
-                className="w-full h-full focus:ring-0 border-0 bg-base-200/50 focus:bg-base-200/75 text-base-content resize-none rounded-box p-4"
+                className="w-full h-full focus:ring-0 bg-base-200/50 border-neutral/50 focus:border-neutral focus:bg-base-200/75 text-base-content resize-none rounded-t-box p-4 pt-2"
                 onChange={({ target }) => setData("content", target.value)}
                 value={data.content}
                 onBlur={() => hasChanges && formRef.current?.requestSubmit()}

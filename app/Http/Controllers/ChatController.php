@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\GAIAStatus;
 use App\Events\UserMessageSent;
 use App\Jobs\ProcessMessageJob;
+use App\Jobs\ProcessPromptJob;
 use App\Models\ExamFile;
 use App\Models\ExamNotes;
 use App\Models\Message;
@@ -21,22 +22,30 @@ class ChatController extends Controller
 
     public function show(int $id, Request $request)
     {
-        $examFile = ExamFile::findOrFail($id);
+        $examFile = ExamFile::with('shareable')->findOrFail($id);
+
         $request->validate([
             'user_context' => 'nullable|exists:users,id'
         ]);
 
+        $user = User::find(Auth::id());
         $user_context = $request->input('user_context');
 
-        $user = User::find(Auth::id());
-        // $result = Gemini::generativeModel('models/gemini-1.5-flash')->generateContent('Hello');
-        // $text = $result->text();
+        abort_unless(
+            $examFile->owner_id == $user->id ||
+                $examFile->shareable->contains('id', $user->id),
+            401
+        );
 
         $bot_name = $examFile->exam_bot->name;
         $subject = $examFile->subject;
         $bot_last_message_content = "Hello Students, I am $bot_name \nOur topic for today is '$subject'";
-        $bot_last_message = Message::where('exam_file_id', $examFile->id)
+        $bot_last_message = Message::with('reply_to.sender')
+            ->where('exam_file_id', $examFile->id)
             ->where('is_gaia', true)
+            ->whereHas('reply_to', function ($q) use ($user) {
+                $q->where('sender_id', $user->id);
+            })
             ->orderBy('created_at', 'desc')
             ->first();
 
@@ -51,10 +60,9 @@ class ChatController extends Controller
                 ->where(function ($query) use ($user_context) {
                     $query->where('sender_id', $user_context)
                         ->orWhere(function ($subQuery) use ($user_context) {
-                            $subQuery->where('is_gaia', 1)
-                                ->whereHas('reply_to', function ($q) use ($user_context) {
-                                    $q->where('sender_id', $user_context);
-                                });
+                            $subQuery->whereHas('reply_to', function ($q) use ($user_context) {
+                                $q->where('sender_id', $user_context);
+                            });
                         });
                 })
                 ->orderBy('created_at', 'desc')
@@ -63,6 +71,7 @@ class ChatController extends Controller
         } else {
             $messages = Message::with(['sender', 'reply_from.sender'])
                 ->where('exam_file_id', $examFile->id)
+                ->whereNull('reply_to')
                 ->where('is_gaia', false)
                 ->orderBy('created_at', 'desc')
                 ->paginate(20)
@@ -77,14 +86,16 @@ class ChatController extends Controller
             'messages' => $messages,
             'note' => Inertia::defer(
                 function () use ($user_context, $user) {
-                    return ExamNotes::query()
+                    return ExamNotes::with('owner')
                         ->when(!!$user_context, fn($q) => $q->where('owner_id', $user_context))
                         ->when(!$user_context, fn($q) => $q->where('owner_id', $user->id))
                         ->first();
                 }
             ),
             'user_context' => $user_context,
-            'read_only' => !!$user_context
+            'read_only' => !!$user_context && $user_context != $user->id,
+            'is_owner' => $user->id == $examFile->owner_id,
+            'other_users' => Inertia::defer(fn() => User::where('id', '!=', $examFile->owner_id)->get())
         ]);
     }
 
@@ -92,32 +103,47 @@ class ChatController extends Controller
     {
         $examFile = ExamFile::findOrFail($id);
 
-        $request->validate([
-            'content' => 'required|string|max:1000'
-        ], ['content.required' => 'You haven\'t type anything', 'content.max' => 'max text length']);
+        $validated = $request->validate([
+            'content' => 'required|string|max:1000',
+            'user_context' => 'nullable|exists:users,id',
+        ], [
+            'content.required' => 'You haven\'t typed anything',
+            'content.max' => 'Max text length exceeded',
+        ]);
 
         $sender_id = Auth::id();
-        $content = $request->input('content');
+        $content = $validated['content'];
+        $user_context = $validated['user_context'] ?? null;
 
-        $message = Message::create([
+        $messageData = [
             'exam_file_id' => $examFile->id,
             'sender_id' => $sender_id,
             'is_gaia' => false,
             'content' => $content,
-            'responded' => false
-        ]);
+            'responded' => false,
+        ];
+
+        // Attach reply_to if user_context is provided and a matching message exists
+        if ($user_context && $sender_id != $user_context) {
+            $replyToMessage = Message::with(['sender', 'reply_from.sender'])
+                ->where('exam_file_id', $examFile->id)
+                ->where('sender_id', $user_context)
+                ->latest()
+                ->first();
+
+            if ($replyToMessage) {
+                $messageData['reply_to'] = $replyToMessage->id;
+            }
+        }
+
+        $message = Message::create($messageData);
 
         broadcast(new UserMessageSent($examFile->id, $sender_id));
 
-        // $lockKey = "process_messages_lock_{$examFile->id}";
-        // $lock = Cache::lock($lockKey, 10);
-
-        // if ($lock->get()) {
-        //     broadcast(new GAIAStatus($examFile->id, "listening"));
-        //     ProcessMessageJob::dispatch($examFile, $lockKey, $lock->owner())
-        //         ->delay(now()->addSeconds(5));
-        // }
-
+        if (!$user_context || $sender_id == $user_context) {
+            broadcast(new GAIAStatus($examFile->id, $sender_id, "listening"));
+            ProcessPromptJob::dispatch($examFile, $message);
+        }
 
         return back();
     }

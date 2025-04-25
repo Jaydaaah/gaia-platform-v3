@@ -7,7 +7,7 @@ export default function ThemeController() {
         return selected_theme;
     }, []);
 
-    const [selected, setSelected] = useState(initialTheme ?? "forest");
+    const [selected, setSelected] = useState(initialTheme ?? "cupcake");
 
     useEffect(() => {
         localStorage.setItem("selected_theme", selected);

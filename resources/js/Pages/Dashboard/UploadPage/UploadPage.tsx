@@ -52,8 +52,6 @@ export default function UploadPage() {
         [context]
     );
 
-    console.log("context: ", context.instruction);
-
     return (
         <ModalLayout>
             <form

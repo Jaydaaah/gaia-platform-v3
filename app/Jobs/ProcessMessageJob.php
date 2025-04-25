@@ -124,14 +124,14 @@ class ProcessMessageJob implements ShouldQueue
             ->where('responded', false)
             ->update(['responded' => true]);
 
-        broadcast(new GAIAStatus($exam_file_id, "typing"));
+        // broadcast(new GAIAStatus($exam_file_id, "typing"));
 
         $model = Gemini::generativeModel('models/gemini-1.5-flash');
         $chat = $model->startChat(history: $history);
 
         // $instruction = str_replace(["{{OUTLINE}}"], $this->exam_file->context->instruction, GAIAInstruct::PROGRESS_INSTRUCTION);
         // $chat->sendMessage($instruction);
-        $prompt = str_replace(["{{instruction}}", "{{unresponded}}"], [$this->exam_file->context->instruction, $imploded_unresponded], GAIAInstruct::PROMPT_INSTRUCTION);
+        $prompt = str_replace(["{{instruction}}", "{{prompt}}"], [$this->exam_file->context->instruction, $imploded_unresponded], GAIAInstruct::PROMPT_INSTRUCTION);
         $response = $chat->sendMessage($prompt);
         $response_text = $response->text();
 
@@ -151,7 +151,7 @@ class ProcessMessageJob implements ShouldQueue
 
 
         broadcast(new GAIAResponse($exam_file_id, $post_response_text));
-        broadcast(new GAIAStatus($exam_file_id, "responded"));
+        // broadcast(new GAIAStatus($exam_file_id, "responded"));
 
         Cache::restoreLock($this->lockKey, $this->lockOwner)->release();
     }
