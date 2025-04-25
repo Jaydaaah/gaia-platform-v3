@@ -12,12 +12,12 @@ class ExamNoteController extends Controller
     {
         $request->validate([
             'exam_id' => 'required|exists:exam_files,id',
-            'content' => 'required|string',
+            'content' => 'required|string|min:0',
         ]);
 
         $owner_id = Auth::id();
         $exam_id = $request->input('exam_id');
-        $content = $request->input('content');
+        $content = $request->input('content', '');
 
         ExamNotes::updateOrCreate(
             [

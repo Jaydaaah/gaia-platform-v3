@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('exam_file_id')->constrained()->onDelete('cascade');
-            $table->foreignId('sender_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->boolean('is_gaia');
-            $table->boolean('responded');
+            $table->foreignId('sender_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->boolean('responded')->nullable();
+            $table->foreignId('reply_to')->nullable()->constrained('messages')->onDelete('cascade');
             $table->text('content');
             $table->timestamps();
         });

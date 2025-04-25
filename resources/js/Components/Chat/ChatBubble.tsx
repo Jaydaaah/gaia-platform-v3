@@ -5,6 +5,7 @@ interface ChatBubbleProps {
     sender: string;
     side: "start" | "end";
     avatarNode: ReactNode;
+    footer?: ReactNode;
     time: string;
 }
 export default function ChatBubble({
@@ -12,6 +13,7 @@ export default function ChatBubble({
     sender,
     side,
     avatarNode,
+    footer,
     time,
 }: PropsWithChildren<ChatBubbleProps>) {
     const formattedTime = useMemo(() => {
@@ -21,7 +23,7 @@ export default function ChatBubble({
     }, [time]);
 
     return (
-        <div className={`chat ${side == "end" ? "chat-start" : "chat-start"}`}>
+        <div className={`chat ${side == "end" ? "chat-end" : "chat-start"}`}>
             <div className="chat-image avatar">
                 <div className="w-10 rounded-full">{avatarNode}</div>
             </div>
@@ -30,6 +32,7 @@ export default function ChatBubble({
                 <time className="text-xs opacity-50">{formattedTime}</time>
             </div>
             <div className="chat-bubble">{children}</div>
+            <div className="chat-footer ">{footer}</div>
         </div>
     );
 }

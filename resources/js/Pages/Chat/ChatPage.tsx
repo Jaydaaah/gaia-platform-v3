@@ -1,7 +1,4 @@
-import {
-    useState,
-    useMemo,
-} from "react";
+import { useState, useMemo } from "react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { usePage } from "@inertiajs/react";
 import { ChatPageProps } from "./types";
@@ -12,7 +9,7 @@ import GAIABubble from "./partial/GAIABubble";
 import ChatFeed from "./partial/ChatFeed";
 export default function ChatPage() {
     const {
-        props: { exam_file },
+        props: { exam_file, read_only },
     } = usePage<ChatPageProps>();
 
     const [moveAside, setMoveAside] = useState(false);
@@ -28,17 +25,19 @@ export default function ChatPage() {
                 <h2 className="text-2xl font-semibold text-center">
                     Topic: {subject}
                 </h2>
-                <NotesSection />
             </div>
             <div className="h-full flex flex-row-reverse gap-5">
                 <div className="w-2/5 xl:w-1/3 flex flex-col px-2">
                     <ChatFeed />
                 </div>
 
-                <div className="w-1/2 h-full mx-auto overflow-hidden">
-                    <GAIAContainer moveAside={moveAside}>
-                        <GAIABubble moveAside={moveAside} />
-                    </GAIAContainer>
+                <div className="w-1/2 h-full mx-auto overflow-hidden relative">
+                    {!read_only && (
+                        <GAIAContainer moveAside={moveAside}>
+                            <GAIABubble moveAside={moveAside} />
+                        </GAIAContainer>
+                    )}
+                    <NotesSection />
                     <PDFView onToggle={(show) => setMoveAside(show)} />
                 </div>
             </div>

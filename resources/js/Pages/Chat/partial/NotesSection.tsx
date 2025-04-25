@@ -16,13 +16,13 @@ import Loading from "@/Components/Loading/Loading";
 
 export default function NotesSection() {
     const {
-        props: { note, exam_file },
+        props: { note, exam_file, read_only },
     } = usePage<ChatPageProps>();
 
     const formRef = useRef<HTMLFormElement>(null);
 
     const content = useMemo(() => {
-        return note?.content;
+        return note?.content ?? "";
     }, [note]);
 
     const { id: exam_id } = useMemo(() => {
@@ -59,41 +59,25 @@ export default function NotesSection() {
     return (
         <form
             ref={formRef}
-            className="absolute right-10 top-0"
+            className="w-full h-full absolute"
             onSubmit={onSubmit}
         >
-            <Dropdown className="dropdown-end">
-                <summary className="btn m-1 animate-pulse hover:animate-none">
-                    <MdNotes />
-                </summary>
-                <DropdownContent
-                    className="w-96 z-50 bg-base-300 rounded-box p-6"
-                    doNotWrap
-                >
-                    <h2 className="text-xl text-center mb-3">Notes</h2>
-                    <div className="relative">
-                        <textarea
-                            className="w-full focus:ring-0 h-72 bg-base-200 text-base-content"
-                            onChange={({ target }) =>
-                                setData("content", target.value)
-                            }
-                            value={data.content}
-                            onBlur={() =>
-                                hasChanges && formRef.current?.requestSubmit()
-                            }
-                        />
-                        {processing && (
-                            <Loading className="loading-xs absolute top-2 right-2" />
-                        )}
-                        {error_text ||
-                            (content == undefined && (
-                                <span className="text-xs text-error absolute bottom-2 left-2">
-                                    {error_text}
-                                </span>
-                            ))}
-                    </div>
-                </DropdownContent>
-            </Dropdown>
+            <textarea
+                className="w-full h-full focus:ring-0 border-0 bg-base-200/50 focus:bg-base-200/75 text-base-content resize-none rounded-box p-4"
+                onChange={({ target }) => setData("content", target.value)}
+                value={data.content}
+                onBlur={() => hasChanges && formRef.current?.requestSubmit()}
+                readOnly={read_only}
+            />
+            {processing && (
+                <Loading className="loading-xs absolute top-2 right-2" />
+            )}
+            {error_text ||
+                (content == undefined && (
+                    <span className="text-xs text-error absolute bottom-2 left-2">
+                        {error_text}
+                    </span>
+                ))}
         </form>
     );
 }

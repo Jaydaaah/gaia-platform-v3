@@ -39,16 +39,7 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
         rate: 0.9,
         pitch: 0.8,
         voiceURI: "Google UK English Male",
-        autoPlay: true,
     });
-
-    const [hide, setHide] = useState(false);
-
-    useEffect(() => {
-        if (!moveAside) {
-            setHide(false);
-        }
-    }, [moveAside]);
 
     const botName = useMemo(() => {
         return bot_name.length ? bot_name : "Sara";
@@ -133,16 +124,7 @@ export default function GAIABubble({ moveAside }: GAIABubbleProps) {
                 </div>
             </div>
             <div
-                onClick={() => !!moveAside && setHide((prev) => !prev)}
-                className={`chat-bubble max-h-72 overflow-y-auto select-none min-h-20 min-w-52 ${
-                    moveAside
-                        ? `${
-                              hide
-                                  ? "opacity-20 -translate-x-[100%]"
-                                  : "opacity-75"
-                          }`
-                        : "hover:scale-[102%]s"
-                } transition-all duration-500 ${
+                className={`chat-bubble max-h-72 overflow-y-auto select-none min-h-20 min-w-52 transition-all duration-500 ${
                     status == "responded" ? "" : "skeleton opacity-50"
                 }`}
             >

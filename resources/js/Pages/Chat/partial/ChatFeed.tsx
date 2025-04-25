@@ -14,13 +14,16 @@ import { ChatPageProps } from "../types";
 import echo from "@/echo";
 import { GAIAStatus, UserMessageSent } from "@/types/Types";
 import Avatar from "@/Components/Avatar/Avatar";
+import ReplyNode from "../components/ReplyNode";
 
 export default function ChatFeed() {
     const {
         props: {
             exam_file,
-            messages: message_raw,
+            messages,
             auth: { user },
+            user_context,
+            read_only,
         },
     } = usePage<ChatPageProps>();
 
@@ -29,23 +32,6 @@ export default function ChatFeed() {
     const { id: exam_id } = useMemo(() => {
         return exam_file ?? {};
     }, [exam_file]);
-
-    const messages = useMemo(() => {
-        if (Array.isArray(message_raw)) {
-            return message_raw
-                .filter(({ is_gaia }) => !is_gaia)
-                .map(({ id, sender, created_at, content, is_gaia }) => {
-                    return {
-                        id,
-                        is_gaia,
-                        content,
-                        created_at,
-                        sender: sender.name,
-                    };
-                });
-        }
-        return [];
-    }, [message_raw]);
 
     const { data, setData, processing, errors, patch } = useForm({
         content: "",
@@ -70,8 +56,9 @@ export default function ChatFeed() {
     useEffect(() => {
         const channel = echo.private(`chat-window.${exam_id}`);
         channel.listen(
-            "UserMessageSent",
+            ".user.message.sent",
             ({ exam_file_id, sender_id }: UserMessageSent) => {
+                console.log("received message from: ", exam_file_id, sender_id);
                 if (exam_file_id == exam_id && user.id != sender_id) {
                     router.reload({
                         only: ["messages"],
@@ -101,14 +88,30 @@ export default function ChatFeed() {
     return (
         <div className="flex-grow w-full max-w-7xl flex flex-col">
             {/* Header */}
-            <div className="p-4 rounded-box bg-primary text-primary-content flex justify-between items-center">
-                <h1 className="text-lg font-bold">Chat Room</h1>
-                <button
-                    className="btn btn-sm btn-error"
-                    onClick={() => router.visit(route("dashboard.index"))}
-                >
-                    Leave Chat
-                </button>
+            <div className="relative">
+                <div className="p-4 rounded-box bg-primary text-primary-content flex justify-between items-center">
+                    <h1 className="text-lg font-bold">Chat Room</h1>
+                    <div className="flex gap-2">
+                        {!!user_context && (
+                            <button
+                                className="btn btn-sm btn-warning"
+                                onClick={() => window.history.back()}
+                            >
+                                Go Back
+                            </button>
+                        )}
+                        <button
+                            className="btn btn-sm btn-error"
+                            onClick={() =>
+                                router.visit(route("dashboard.index"))
+                            }
+                        >
+                            Leave Chat
+                        </button>
+                    </div>
+                </div>
+
+                {/* <ChatFilter /> */}
             </div>
 
             {/* Chat Messages */}
@@ -116,13 +119,33 @@ export default function ChatFeed() {
                 <div ref={chatEndRef} />
                 {/* chat here */}
                 <>
-                    {messages.map(
-                        ({ id, content, is_gaia, sender, created_at }) => (
+                    {messages?.map(
+                        ({
+                            id,
+                            content,
+                            is_gaia,
+                            sender,
+                            created_at,
+                            reply_from,
+                        }) => (
                             <ChatBubble
-                                avatarNode={<Avatar name={sender} />}
+                                avatarNode={<Avatar name={sender.name} />}
+                                footer={
+                                    reply_from &&
+                                    reply_from.length > 0 && (
+                                        <ReplyNode
+                                            replies={reply_from}
+                                            user_context={sender.id}
+                                        />
+                                    )
+                                }
                                 key={id}
-                                side={is_gaia ? "start" : "end"}
-                                sender={sender}
+                                side={
+                                    is_gaia || sender?.id != user.id
+                                        ? "start"
+                                        : "end"
+                                }
+                                sender={sender.name}
                                 time={created_at}
                             >
                                 {content}
@@ -139,7 +162,7 @@ export default function ChatFeed() {
                     value={data.content}
                     error={errors.content}
                     processing={processing}
-                    disabled={status == "typing"}
+                    disabled={status == "typing" || read_only}
                 />
             </form>
         </div>

@@ -7,7 +7,6 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -21,13 +20,13 @@ class UserMessageSent implements ShouldBroadcastNow
         //
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
-    public function broadcastOn(): array
+    public function broadcastOn()
     {
-        return [new PrivateChannel("chat-window.{$this->exam_file_id}")];
+        return new PrivateChannel("chat-window.{$this->exam_file_id}");
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'user.message.sent';
     }
 }

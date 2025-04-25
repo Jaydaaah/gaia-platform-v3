@@ -6,6 +6,7 @@ use App\Events\GAIAStatus;
 use App\Events\UserMessageSent;
 use App\Jobs\ProcessMessageJob;
 use App\Models\ExamFile;
+use App\Models\ExamNotes;
 use App\Models\Message;
 use App\Models\User;
 use Gemini\Enums\ModelType;
@@ -18,9 +19,14 @@ use Inertia\Inertia;
 class ChatController extends Controller
 {
 
-    public function show(int $id)
+    public function show(int $id, Request $request)
     {
         $examFile = ExamFile::findOrFail($id);
+        $request->validate([
+            'user_context' => 'nullable|exists:users,id'
+        ]);
+
+        $user_context = $request->input('user_context');
 
         $user = User::find(Auth::id());
         // $result = Gemini::generativeModel('models/gemini-1.5-flash')->generateContent('Hello');
@@ -38,17 +44,47 @@ class ChatController extends Controller
             $bot_last_message_content = $bot_last_message->content;
         }
 
+        $messages = null;
+        if ($user_context) {
+            $messages = Message::with(['sender', 'reply_to.sender'])
+                ->where('exam_file_id', $examFile->id)
+                ->where(function ($query) use ($user_context) {
+                    $query->where('sender_id', $user_context)
+                        ->orWhere(function ($subQuery) use ($user_context) {
+                            $subQuery->where('is_gaia', 1)
+                                ->whereHas('reply_to', function ($q) use ($user_context) {
+                                    $q->where('sender_id', $user_context);
+                                });
+                        });
+                })
+                ->orderBy('created_at', 'desc')
+                ->paginate(20)
+                ->items();
+        } else {
+            $messages = Message::with(['sender', 'reply_from.sender'])
+                ->where('exam_file_id', $examFile->id)
+                ->where('is_gaia', false)
+                ->orderBy('created_at', 'desc')
+                ->paginate(20)
+                ->items();
+        }
+
+
         return Inertia::render('Chat/ChatPage', [
             'exam_file' => $examFile,
             'bot_name' => $bot_name,
             'bot_last_message_content' => $bot_last_message_content,
-            'messages' => Message::with('sender')
-                ->where('exam_file_id', $examFile->id)
-                ->where('is_gaia', false)
-                ->orderBy('created_at', 'desc')
-                ->paginate(10)
-                ->items(),
-            'note' => Inertia::defer(fn() => $user->notes()->where('exam_file_id', $examFile->id)->first())
+            'messages' => $messages,
+            'note' => Inertia::defer(
+                function () use ($user_context, $user) {
+                    return ExamNotes::query()
+                        ->when(!!$user_context, fn($q) => $q->where('owner_id', $user_context))
+                        ->when(!$user_context, fn($q) => $q->where('owner_id', $user->id))
+                        ->first();
+                }
+            ),
+            'user_context' => $user_context,
+            'read_only' => !!$user_context
         ]);
     }
 
@@ -73,14 +109,14 @@ class ChatController extends Controller
 
         broadcast(new UserMessageSent($examFile->id, $sender_id));
 
-        $lockKey = "process_messages_lock_{$examFile->id}";
-        $lock = Cache::lock($lockKey, 10);
+        // $lockKey = "process_messages_lock_{$examFile->id}";
+        // $lock = Cache::lock($lockKey, 10);
 
-        if ($lock->get()) {
-            broadcast(new GAIAStatus($examFile->id, "listening"));
-            ProcessMessageJob::dispatch($examFile, $lockKey, $lock->owner())
-                ->delay(now()->addSeconds(5));
-        }
+        // if ($lock->get()) {
+        //     broadcast(new GAIAStatus($examFile->id, "listening"));
+        //     ProcessMessageJob::dispatch($examFile, $lockKey, $lock->owner())
+        //         ->delay(now()->addSeconds(5));
+        // }
 
 
         return back();

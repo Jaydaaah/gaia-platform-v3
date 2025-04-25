@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamNoteController;
@@ -16,6 +17,10 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
+});
+
+Route::group([], function () {
+    Route::get('/retrieve-message', [MessageController::class, 'retrieve_message']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

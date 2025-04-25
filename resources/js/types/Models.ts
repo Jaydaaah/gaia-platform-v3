@@ -24,10 +24,12 @@ export interface ExamContext {
 }
 
 export interface Message {
+    id: number;
+    sender_id?: number;
     is_gaia: boolean;
     content: string;
     created_at: string;
-    id: number;
+    reply_to?: Message;
 }
 
 export interface ExamNotes {

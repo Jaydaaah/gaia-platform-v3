@@ -5,6 +5,11 @@ export type ChatPageProps = PageProps<{
     exam_file: ExamFile;
     bot_name: string;
     bot_last_message_content?: string;
-    messages?: (Message & { sender: User })[];
+    messages?: (Message & {
+        sender: User;
+        reply_from?: (Message & { sender: User })[];
+    })[];
     note: ExamNotes | null;
+    user_context?: number;
+    read_only: boolean;
 }>;
