@@ -69,7 +69,7 @@ export default function UploadPage() {
         text: "This is a test message to check the selected voice.",
         voiceURI: data.voice, // The selected voice from the form
         rate: 0.9, // Adjust the rate
-        pitch: 0.8, // Adjust the pitch
+        pitch: 1, // Adjust the pitch
     });
 
     // useCallback for the testVoice function

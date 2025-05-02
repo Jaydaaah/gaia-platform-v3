@@ -38,7 +38,7 @@ export default function GAIABubble() {
     const { Text, speechStatus, start, pause, stop } = useSpeech({
         text: textArray[textSelect],
         rate: 0.9,
-        pitch: 0.8,
+        pitch: 1,
         voiceURI: bot.voice_uri ?? "Google UK English Male",
         autoPlay,
     });
