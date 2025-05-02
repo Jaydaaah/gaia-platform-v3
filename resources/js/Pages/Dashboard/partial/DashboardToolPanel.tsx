@@ -5,7 +5,8 @@ import Modal from "@/Components/Modal/Modal";
 import ModalBox from "@/Components/Modal/ModalBox";
 import DashboardCreateFolder from "./DashboardCreateFolder";
 import { useSwal } from "@/Hook/SweetAlert/useSwal";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
+import { DashboardPage } from "../types";
 
 type ToolPanelProps = {
     selected: {
@@ -14,7 +15,17 @@ type ToolPanelProps = {
     } | null;
 };
 export default function DashboardToolPanel({ selected }: ToolPanelProps) {
+    const {
+        props: { folder_id, parent_id },
+    } = usePage<DashboardPage>();
+
     const [deleteThis, setDeleteThis] = useState<
+        {
+            dashboard: number;
+            type: "folder" | "examfile";
+        }[]
+    >([]);
+    const [moveThis, setMoveThis] = useState<
         {
             dashboard: number;
             type: "folder" | "examfile";
@@ -29,12 +40,38 @@ export default function DashboardToolPanel({ selected }: ToolPanelProps) {
             router.delete(route("dashboard.destroy", item), {
                 onSuccess: () => {
                     setDeleteThis((prev) =>
-                        prev.filter(({ dashboard }) => dashboard != item.dashboard)
+                        prev.filter(
+                            ({ dashboard }) => dashboard != item.dashboard
+                        )
                     );
                 },
             });
         });
     }, [deleteThis]);
+
+    useEffect(() => {
+        moveThis.forEach(({ dashboard, type }) => {
+            if (folder_id != parent_id) {
+                router.patch(
+                    route("dashboard.update", dashboard),
+                    {
+                        type,
+                        origin_folder_id: folder_id,
+                        target_folder_id: parent_id,
+                    },
+                    {
+                        onSuccess: () => {
+                            setMoveThis((prev) =>
+                                prev.filter(
+                                    (item) => item.dashboard != dashboard
+                                )
+                            );
+                        },
+                    }
+                );
+            }
+        });
+    }, [moveThis, folder_id, parent_id]);
 
     const deleteClick = useCallback(() => {
         if (!!swal) {
@@ -53,6 +90,12 @@ export default function DashboardToolPanel({ selected }: ToolPanelProps) {
         }
     }, [swal, selected]);
 
+    const moveClick = useCallback(() => {
+        if (selected) {
+            setMoveThis((prev) => [...prev, selected]);
+        }
+    }, [selected]);
+
     return (
         <>
             <div className="join">
@@ -70,6 +113,15 @@ export default function DashboardToolPanel({ selected }: ToolPanelProps) {
                     Delete
                     <BsFillTrashFill />
                 </Button>
+                {!!folder_id && (
+                    <Button
+                        className="join-item"
+                        disabled={!selected}
+                        onClick={moveClick}
+                    >
+                        Move Outside
+                    </Button>
+                )}
             </div>
             <Modal _ref={dialogRef}>
                 <ModalBox className="max-w-sm">

@@ -12,6 +12,7 @@ export interface ExamFile {
     id: number;
     name: string;
     subject: string;
+    owner_id: number;
     description: string;
     updated_at: string;
 }

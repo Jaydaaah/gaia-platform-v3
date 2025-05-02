@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InviteUser;
 use App\Models\ExamFile;
+use App\Models\User;
+use App\Trait\canDoToast;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ShareableController extends Controller
 {
+    use canDoToast;
+
     public function update(int $exam_file_id, Request $request)
     {
         $exam_file = ExamFile::findOrFail($exam_file_id);
@@ -22,6 +27,14 @@ class ShareableController extends Controller
         ]);
 
         // Sync shareable users (replace with your actual relationship name if different)
-        $exam_file->shareable()->sync($validated['user_ids'] ?? []);
+        $syncResult = $exam_file->shareable()->sync($validated['user_ids'] ?? []);
+
+        foreach ($syncResult['attached'] as $key => $user_id) {
+            if ($user) {
+                broadcast(new InviteUser($user_id));
+            }
+        }
+
+        $this->sendToast('success', 'Notified added users');
     }
 }

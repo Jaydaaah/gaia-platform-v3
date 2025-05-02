@@ -69,7 +69,7 @@ export default function ChatFeed() {
             }
         );
         return () => {
-            channel.stopListening("UserMessageSent");
+            channel.stopListening(".user.message.sent");
         };
     }, [exam_id, user]);
 
@@ -86,7 +86,7 @@ export default function ChatFeed() {
             }
         });
         return () => {
-            channel.stopListening("UserMessageSent");
+            channel.stopListening("GAIAStatus");
         };
     }, [exam_id, user]);
 

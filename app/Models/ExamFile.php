@@ -47,4 +47,9 @@ class ExamFile extends Model
     {
         return $this->hasOne(ExamBot::class, 'exam_file_id');
     }
+
+    public function accepted()
+    {
+        return $this->hasMany(ExamFileSharedAccepted::class, 'exam_file_id');
+    }
 }

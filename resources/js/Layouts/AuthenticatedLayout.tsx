@@ -9,6 +9,8 @@ import { PropsWithChildren, ReactNode, useState } from "react";
 import { Bounce, ToastContainer } from "react-toastify";
 import ToastProvider from "./partial/ToastProvider";
 import GAIALogo from "@/Components/GAIALogo";
+import SharedToYou from "@/Components/SharedToYou/SharedToYou";
+import TakenTestLink from "@/Components/TakenTestLink/TakenTestLink";
 
 const app_name = import.meta.env.VITE_APP_NAME;
 
@@ -56,6 +58,10 @@ export default function Authenticated({
                             </details>
                         </li>
                     </ul> */}
+
+                    <TakenTestLink />
+
+                    <SharedToYou />
                     <ThemeController />
                     <div className="dropdown dropdown-end">
                         <div

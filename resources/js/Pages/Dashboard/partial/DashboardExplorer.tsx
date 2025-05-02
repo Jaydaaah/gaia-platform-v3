@@ -24,7 +24,12 @@ export default function DashboardExplorer({
     setSelected,
 }: DashboardExplorerProps) {
     const {
-        props: { folders, files },
+        props: {
+            folders,
+            files,
+            folder_id,
+            auth: { user },
+        },
     } = usePage<DashboardPage>();
 
     const folderItems = useMemo(() => {
@@ -79,6 +84,8 @@ export default function DashboardExplorer({
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 mt-6">
                     {folderItems.map(({ id, name }) => (
                         <FileFolder
+                            parent_id={folder_id}
+                            folder_id={id}
                             key={id}
                             title={name}
                             onFocus={onFocus(id, "folder")}
@@ -88,10 +95,14 @@ export default function DashboardExplorer({
                             }}
                         />
                     ))}
-                    {fileItems.map(({ id, name }) => (
+                    {fileItems.map(({ id, name, owner_id }) => (
                         <FileExam
+                            exam_file_id={id}
+                            parent_id={folder_id}
                             key={id}
-                            title={name}
+                            title={
+                                owner_id == user.id ? name : `(shared) ${name}`
+                            }
                             onFocus={onFocus(id, "examfile")}
                             onBlur={onBlur(id, "examfile")}
                             onDoubleClick={() => {

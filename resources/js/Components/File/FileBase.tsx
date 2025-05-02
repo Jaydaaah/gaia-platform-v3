@@ -14,7 +14,9 @@ export default function FileBase({
             className={`p-4 bg-base-200 rounded-lg overflow-clip shadow-sm hover:bg-base-300 flex flex-col items-center justify-center border-2 border-transparent focus:border-base-content ${className}`}
         >
             {children}
-            <span className="mt-2 text-sm line-clamp-2 font-medium">{title}</span>
+            <span className="mt-2 text-sm line-clamp-2 font-medium select-none">
+                {title}
+            </span>
         </div>
     );
 }

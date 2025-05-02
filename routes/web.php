@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExamFileController;
 use App\Http\Controllers\ExamNoteController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ProfileController;
@@ -33,6 +34,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('chat', ChatController::class)->names('chat');
     Route::resource('chat/notes', ExamNoteController::class)->names('chat.notes');
     Route::resource('chat/share', ShareableController::class)->names('chat.share');
+
+    Route::post('exam-file/accept', [ExamFileController::class, 'accept'])->name('examfile.accept');
+    Route::delete('exam-file/delete/{exam_file_id}', [ExamFileController::class, 'destroy'])->name('examfile.destroy');
+    Route::patch('exam-file/move/{exam_file_id}', [ExamFileController::class, 'move'])->name('examfile.move');
 
     Route::post('/unreal-speech', [UnrealSpeechController::class, 'synthesize'])->name('speech.synthesize');
 });

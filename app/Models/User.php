@@ -65,4 +65,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ExamNotes::class, 'owner_id');
     }
+
+    public function accepted()
+    {
+        return $this->hasMany(ExamFileSharedAccepted::class, 'user_id');
+    }
 }
