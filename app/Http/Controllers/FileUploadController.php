@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Smalot\PdfParser\Parser;
 
+ini_set('memory_limit', '512M');
+
 class FileUploadController extends Controller
 {
     use canDoToast;
@@ -99,6 +101,7 @@ class FileUploadController extends Controller
             'folder_id' => 'nullable|exists:folders,id',
             'name' => 'required|min:3|max:100',
             'bot_name' => 'required|min:3|max:16',
+            'voice' => 'required|string',
             'subject' => 'required|min:3|max:120',
             'description' => 'required|min:3|max:1000'
         ]);
@@ -107,6 +110,7 @@ class FileUploadController extends Controller
 
         $name = $request->input('name');
         $bot_name = $request->input('bot_name');
+        $voice = $request->input('voice');
         $subject = $request->input('subject');
         $description = $request->input('description');
         $user_id = Auth::id();
@@ -120,7 +124,8 @@ class FileUploadController extends Controller
         ]);
 
         $examFile->exam_bot()->create([
-            'name' => $bot_name
+            'name' => $bot_name,
+            'voice_uri' => $voice,
         ]);
 
         $examContext->exam_file_id = $examFile->id;

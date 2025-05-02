@@ -100,9 +100,8 @@ export default function DashboardExplorer({
                             exam_file_id={id}
                             parent_id={folder_id}
                             key={id}
-                            title={
-                                owner_id == user.id ? name : `(shared) ${name}`
-                            }
+                            title={name}
+                            isShared={owner_id != user.id}
                             onFocus={onFocus(id, "examfile")}
                             onBlur={onBlur(id, "examfile")}
                             onDoubleClick={() => {

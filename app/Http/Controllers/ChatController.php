@@ -37,9 +37,9 @@ class ChatController extends Controller
             401
         );
 
-        $bot_name = $examFile->exam_bot->name;
+        $bot = $examFile->exam_bot;
         $subject = $examFile->subject;
-        $bot_last_message_content = "Hello Students, I am $bot_name \nOur topic for today is '$subject'";
+        $bot_last_message_content = "Hello Students, I am $bot->name \nOur topic for today is '$subject'";
         $bot_last_message = Message::with('reply_to.sender')
             ->where('exam_file_id', $examFile->id)
             ->where('is_gaia', true)
@@ -81,7 +81,7 @@ class ChatController extends Controller
 
         return Inertia::render('Chat/ChatPage', [
             'exam_file' => $examFile,
-            'bot_name' => $bot_name,
+            'bot' => $bot,
             'bot_last_message_content' => $bot_last_message_content,
             'messages' => $messages,
             'note' => Inertia::defer(

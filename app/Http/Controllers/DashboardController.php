@@ -34,8 +34,14 @@ class DashboardController extends Controller
                     ->get() : []
             ),
             'files' => Inertia::defer(
-                fn() => ExamFile::whereHas('accepted', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
+                fn() => ExamFile::where(function ($query) use ($user) {
+                    $query->where('owner_id', $user->id)
+                        ->orWhere(function ($subQuery) use ($user) {
+                            $subQuery->where('owner_id', '!=', $user->id)
+                                ->whereHas('accepted', function ($q) use ($user) {
+                                    $q->where('user_id', $user->id);
+                                });
+                        });
                 })
                     ->where(function ($query) use ($user) {
                         $query->whereDoesntHave('folders')
@@ -146,7 +152,7 @@ class DashboardController extends Controller
             try {
                 $examFile = ExamFile::findOrFail($dashboard);
 
-                abort_unless($examFile->owner_id == $user->id || $examFile->shareable()->contains($user->id), 403);
+                abort_unless($examFile->owner_id == $user->id || $examFile->shareable->contains($user->id), 403);
 
                 $origin_folder = Folder::find($origin_folder_id);
                 $target_folder = Folder::find($target_folder_id);

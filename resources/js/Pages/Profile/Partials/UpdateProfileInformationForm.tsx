@@ -32,9 +32,11 @@ export default function UpdateProfileInformation({
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium">Profile Information</h2>
+                <h2 className="text-lg font-medium text-base-content">
+                    Profile Information
+                </h2>
 
-                <p className="mt-1 text-sm">
+                <p className="mt-1 text-sm text-base-content/70">
                     Update your account's profile information and email address.
                 </p>
             </header>
@@ -45,7 +47,7 @@ export default function UpdateProfileInformation({
 
                     <TextInput
                         id="name"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full input input-bordered"
                         value={data.name}
                         onChange={(e) => setData("name", e.target.value)}
                         required
@@ -53,7 +55,10 @@ export default function UpdateProfileInformation({
                         autoComplete="name"
                     />
 
-                    <InputError className="mt-2" message={errors.name} />
+                    <InputError
+                        className="mt-2 text-error"
+                        message={errors.name}
+                    />
                 </div>
 
                 <div>
@@ -62,25 +67,28 @@ export default function UpdateProfileInformation({
                     <TextInput
                         id="email"
                         type="email"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full input input-bordered"
                         value={data.email}
                         onChange={(e) => setData("email", e.target.value)}
                         required
                         autoComplete="username"
                     />
 
-                    <InputError className="mt-2" message={errors.email} />
+                    <InputError
+                        className="mt-2 text-error"
+                        message={errors.email}
+                    />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
-                        <p className="mt-2 text-sm">
+                        <p className="mt-2 text-sm text-base-content/70">
                             Your email address is unverified.
                             <Link
                                 href={route("verification.send")}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 "
+                                className="rounded-md text-sm text-primary underline hover:text-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             >
                                 Click here to re-send the verification email.
                             </Link>
@@ -105,9 +113,7 @@ export default function UpdateProfileInformation({
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm">
-                            Saved.
-                        </p>
+                        <p className="text-sm text-base-content/70">Saved.</p>
                     </Transition>
                 </div>
             </form>

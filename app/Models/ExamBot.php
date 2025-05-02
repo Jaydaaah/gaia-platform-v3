@@ -8,7 +8,7 @@ class ExamBot extends Model
 {
     protected $table = 'exam_bots';
 
-    protected $fillable = ['name', 'exam_file_id'];
+    protected $fillable = ['name', 'exam_file_id', 'voice_uri'];
 
     public function exam_file()
     {

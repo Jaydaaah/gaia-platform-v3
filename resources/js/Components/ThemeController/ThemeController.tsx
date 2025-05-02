@@ -21,7 +21,7 @@ export default function ThemeController() {
     );
 
     return (
-        <div className="dropdown">
+        <div className="dropdown dropdown-bottom">
             <div tabIndex={0} role="button" className="btn btn-ghost m-1">
                 Theme
                 <svg

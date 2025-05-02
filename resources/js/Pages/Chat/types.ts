@@ -1,9 +1,9 @@
 import { PageProps, User } from "@/types";
-import { ExamFile, ExamNotes, Message } from "@/types/Models";
+import { ExamBot, ExamFile, ExamNotes, Message } from "@/types/Models";
 
 export type ChatPageProps = PageProps<{
     exam_file: ExamFile & { shareable: User[] };
-    bot_name: string;
+    bot: ExamBot;
     bot_last_message_content?: string;
     messages?: (Message & {
         sender: User;

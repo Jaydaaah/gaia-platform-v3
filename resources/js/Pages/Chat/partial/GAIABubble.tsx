@@ -4,7 +4,7 @@ import { usePage } from "@inertiajs/react";
 import { ChatPageProps } from "../types";
 import echo from "@/echo";
 import { GAIAResponse, GAIAStatus } from "@/types/Types";
-import { useSpeech } from "react-text-to-speech";
+import { useSpeech, useVoices } from "react-text-to-speech";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
@@ -12,7 +12,7 @@ export default function GAIABubble() {
     const {
         props: {
             auth: { user },
-            bot_name,
+            bot,
             bot_last_message_content,
             exam_file: { id: exam_id },
         },
@@ -39,7 +39,7 @@ export default function GAIABubble() {
         text: textArray[textSelect],
         rate: 0.9,
         pitch: 0.8,
-        voiceURI: "Google UK English Male",
+        voiceURI: bot.voice_uri ?? "Google UK English Male",
         autoPlay,
     });
 
@@ -48,8 +48,8 @@ export default function GAIABubble() {
     }, []);
 
     const botName = useMemo(() => {
-        return bot_name.length ? bot_name : "Sara";
-    }, [bot_name]);
+        return bot.name.length ? bot.name : "Sara";
+    }, [bot]);
 
     useEffect(() => {
         const channel = echo.private(`chat-window.${exam_id}.${user.id}`);

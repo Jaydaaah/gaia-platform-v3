@@ -8,13 +8,14 @@ export default function Welcome({
     auth,
 }: PageProps<{ laravelVersion: string; phpVersion: string }>) {
     return (
-        <div className="min-h-screen bg-base-100 text-base-content flex flex-col">
+        <div className="min-h-screen bg-base-100 text-base-content flex flex-col overflow-x-hidden">
             {/* Navbar */}
             <header className="navbar bg-base-100 shadow">
                 <div className="flex-1">
                     <h1 className="text-2xl font-bold text-primary">GAIA</h1>
                 </div>
                 <nav className="-mx-3 flex flex-1 justify-end">
+                    <ThemeController />
                     {auth.user ? (
                         <Link
                             href={route("dashboard.index")}
@@ -38,7 +39,6 @@ export default function Welcome({
                             </Link>
                         </>
                     )}
-                    <ThemeController />
                 </nav>
             </header>
 

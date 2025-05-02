@@ -38,3 +38,9 @@ export interface ExamNotes {
     exam_file_id: number;
     owner_id: number;
 }
+
+export interface ExamBot {
+    exam_file_id: number;
+    name: string;
+    voice_uri: string;
+}
