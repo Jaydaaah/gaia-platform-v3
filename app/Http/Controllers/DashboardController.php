@@ -33,41 +33,19 @@ class DashboardController extends Controller
                     ->orderBy('name', 'asc')
                     ->get() : []
             ),
-            'files' => Inertia::defer(
-                fn() => ExamFile::where(function ($query) use ($user) {
-                    $query->where('owner_id', $user->id)
-                        ->orWhere(function ($subQuery) use ($user) {
-                            $subQuery->where('owner_id', '!=', $user->id)
-                                ->whereHas('accepted', function ($q) use ($user) {
-                                    $q->where('user_id', $user->id);
-                                });
-                        });
+            'files' => Inertia::defer(fn() => ExamFile::where(function ($query) use ($user) {
+                $query->where('owner_id', $user->id)
+                    ->whereDoesntHave('folders'); // Owned files not in any folder
+            })->orWhere(function ($query) use ($user) {
+                $query->whereHas('accepted', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
                 })
-                    ->where(function ($query) use ($user) {
-                        $query->whereDoesntHave('folders')
-                            ->orWhereHas('folders', function ($q) use ($user) {
-                                $q->where('owner_id', '!=', $user->id);
-                            });
-                    })
-                    ->orderBy('name', 'asc')
-                    ->get() ?? []
-            ),
+                    ->whereHas('folders', function ($q) use ($user) {
+                        $q->where('owner_id', '!=', $user->id);
+                    }); // Shared files in other people’s folders
+            })->orderBy('name', 'asc')->get()),
+
             'parent_id' => null
-            // 'shared_to_you' => Inertia::defer(
-            //     fn() => ExamFile::whereHas('shareable', function ($query) {
-            //         $query->where('users.id', Auth::id());
-            //     })
-            //         ->where(function ($query) {
-            //             $query->whereDoesntHave('folders')
-            //                 ->orWhereHas('folders', function ($q) {
-            //                     $q->where('owner_id', '!=', Auth::id());
-            //                 });
-            //         })
-            //         ->whereDoesntHave('accepted', function ($query) {
-            //             $query->where('user_id', Auth::id());
-            //         })
-            //         ->get()
-            // )
         ]);
     }
 
