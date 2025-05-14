@@ -14,4 +14,5 @@ export type ChatPageProps = PageProps<{
     read_only: boolean;
     is_owner: boolean;
     other_users?: User[];
+    has_rating: boolean;
 }>;

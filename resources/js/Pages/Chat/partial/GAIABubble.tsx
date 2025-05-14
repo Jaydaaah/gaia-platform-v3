@@ -1,3 +1,5 @@
+import { AiFillLock } from "react-icons/ai";
+import { AiOutlineUnlock } from "react-icons/ai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import BotAvatar from "@/Components/Avatar/BotAvatar";
 import { usePage } from "@inertiajs/react";
@@ -7,6 +9,7 @@ import { GAIAResponse, GAIAStatus } from "@/types/Types";
 import { useSpeech, useVoices } from "react-text-to-speech";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { motion } from "motion/react";
 
 export default function GAIABubble() {
     const {
@@ -26,7 +29,7 @@ export default function GAIABubble() {
 
     const textArray = useMemo(() => {
         return text
-            .split("<b>")
+            .split("[break]")
             .map((text) => text.replace("\n", "").trim())
             .filter((text) => text.length > 0);
     }, [text]);
@@ -35,7 +38,9 @@ export default function GAIABubble() {
 
     const [autoPlay, setAutoPlay] = useState(false);
 
-    const { Text, speechStatus, start, pause, stop } = useSpeech({
+    const [snapBack, setSnapBack] = useState(true);
+
+    const { Text, speechStatus, start, stop } = useSpeech({
         text: textArray[textSelect],
         rate: 0.9,
         pitch: 1,
@@ -94,7 +99,7 @@ export default function GAIABubble() {
         if (speechStatus === "stopped" && !hasUnreadMsg) {
             setTextSelect((prev) => {
                 const next = prev + 1;
-                return next < textArray.length ? next : 0;
+                return next < textArray.length ? next : prev;
             });
         }
     }, [speechStatus, hasUnreadMsg, textArray]);
@@ -111,15 +116,21 @@ export default function GAIABubble() {
 
     const handlePlayPause = useCallback(() => {
         if (speechStatus === "started") {
-            pause();
+            stop();
+            setAutoPlay(false);
         } else {
             start();
+            setAutoPlay(true);
         }
-    }, [pause, start]);
+    }, [stop, start, speechStatus]);
 
     return (
-        <div
-            className={`chat chat-start md:text-base lg:text-lg xl:text-xl md:max-w-[50vw]`}
+        <motion.div
+            drag
+            dragDirectionLock
+            dragMomentum={false}
+            dragSnapToOrigin={snapBack}
+            className={`chat chat-start md:text-base lg:text-lg xl:text-xl md:max-w-[50vw] cursor-grab active:cursor-grabbing`}
             tabIndex={0}
             onFocus={() =>
                 (!!hasUnreadMsg || textSelect + 1 < textArray.length) && start()
@@ -132,13 +143,17 @@ export default function GAIABubble() {
             >
                 <div className="w-28 rounded-full overflow-clip relative">
                     <div className="absolute p-4">
-                        <BotAvatar className="w-full h-full" name={botName} />
+                        <BotAvatar
+                            draggable={false}
+                            className="w-full h-full"
+                            name={botName}
+                        />
                     </div>
-                    <div className="w-full h-full bg-base-300" />
+                    <div className="w-full h-full bg-base-300/80" />
                 </div>
             </div>
             <div
-                className={`chat-bubble max-h-72 overflow-y-auto select-none min-h-20 min-w-52 transition-all duration-500 ${
+                className={`chat-bubble bg-base-100/90 shadow text-base-content max-h-72 overflow-y-auto select-none min-h-20 min-w-52 transition-all duration-500 relative ${
                     status === "responded" ? "" : "skeleton opacity-50"
                 }`}
             >
@@ -146,22 +161,29 @@ export default function GAIABubble() {
                     "typing..."
                 ) : (
                     <>
+                        <button
+                            className="absolute left-2 bottom-2 text-gray-500 hover:bg-neutral/10 p-1 rounded-box cursor-pointer text-sm"
+                            onClick={() => setSnapBack((prev) => !prev)}
+                            title={`Drag origin is ${
+                                snapBack ? "lock" : "unlocked"
+                            }`}
+                        >
+                            {snapBack ? <AiFillLock /> : <AiOutlineUnlock />}
+                        </button>
                         <div className="mb-2">{Text()}</div>
                         <div className="flex items-center justify-center gap-3 mt-1">
                             <button
                                 onClick={handleLeft}
-                                className="text-gray-500 hover:text-gray-800 transition"
+                                className="text-gray-500 hover:text-gray-800 cursor-pointer"
                                 title="Previous"
                             >
                                 <HiChevronLeft size={18} />
                             </button>
                             <button
                                 onClick={handlePlayPause}
-                                className="text-primary hover:text-primary/80 transition"
+                                className="text-primary hover:text-primary/80 cursor-pointer"
                                 title={
-                                    speechStatus === "started"
-                                        ? "Pause"
-                                        : "Play"
+                                    speechStatus === "started" ? "stop" : "Play"
                                 }
                             >
                                 {speechStatus === "started" ? (
@@ -172,7 +194,7 @@ export default function GAIABubble() {
                             </button>
                             <button
                                 onClick={handleRight}
-                                className="text-gray-500 hover:text-gray-800 transition"
+                                className="text-gray-500 hover:text-gray-800 cursor-pointer"
                                 title="Next"
                             >
                                 <HiChevronRight size={18} />
@@ -184,6 +206,6 @@ export default function GAIABubble() {
                     </>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 }

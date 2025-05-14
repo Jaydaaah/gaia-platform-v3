@@ -11,15 +11,15 @@ interface ReplyNodeItemProps {
 }
 export default function ReplyNodeItem({ reply }: ReplyNodeItemProps) {
     const {
-        props: { bot_name },
+        props: { bot },
     } = usePage<ChatPageProps>();
 
     const avatarNode = useMemo(() => {
         if (reply.is_gaia) {
-            return <BotAvatar className="w-4 rounded-full" name={bot_name} />;
+            return <BotAvatar className="w-4 rounded-full" name={bot.name} />;
         }
         return <Avatar className="w-4 rounded-full" name={reply.sender.name} />;
-    }, [reply, bot_name]);
+    }, [reply, bot]);
 
     return (
         <div className="flex items-center">

@@ -19,6 +19,7 @@ export default function ReplyNode({ replies, user_context }: ReplyNodeProps) {
             data={{
                 user_context,
             }}
+            only={["messages", "note", "user_context", "read_only",]}
             className="max-w-28 md:max-w-32 lg:max-w-52 hover:opacity-50 cursor-pointer bg-base-300/50 p-1 mt-0.5 rounded-box"
         >
             {replies.map((item) => (

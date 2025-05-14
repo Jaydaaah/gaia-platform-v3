@@ -16,6 +16,7 @@ export default function ChatBubble({
     footer,
     time,
 }: PropsWithChildren<ChatBubbleProps>) {
+
     const formattedTime = useMemo(() => {
         const dateTime = new Date(time);
         const formatted = format(dateTime, "h:mm aaa");

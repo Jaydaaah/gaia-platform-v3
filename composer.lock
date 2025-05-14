@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3054a4ff2ced1fd1f8f2b1fe3acd2c6",
+    "content-hash": "de0e76f5193f574679538eafc821698c",
     "packages": [
         {
             "name": "afaya/edge-tts",
@@ -49,6 +49,67 @@
                 "source": "https://github.com/andresayac/edge-tts-php/tree/v1.2.9"
             },
             "time": "2024-10-16T15:30:51+00:00"
+        },
+        {
+            "name": "blaspsoft/blasp",
+            "version": "v2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Blaspsoft/blasp.git",
+                "reference": "2673f7c8d3072d47672ac3b8edaa5cb05514abcd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Blaspsoft/blasp/zipball/2673f7c8d3072d47672ac3b8edaa5cb05514abcd",
+                "reference": "2673f7c8d3072d47672ac3b8edaa5cb05514abcd",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^10.0",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Blasp": "Blaspsoft\\Blasp\\Facades\\Blasp"
+                    },
+                    "providers": [
+                        "Blaspsoft\\Blasp\\ServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Blaspsoft\\Blasp\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Deeming",
+                    "email": "michael.deeming90@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Blasp is a powerful and customisable profanity filter package for Laravel applications",
+            "homepage": "https://github.com/blaspsoft/blasp",
+            "keywords": [
+                "blasp",
+                "blaspsoft"
+            ],
+            "support": {
+                "issues": "https://github.com/Blaspsoft/blasp/issues",
+                "source": "https://github.com/Blaspsoft/blasp/tree/v2.1.0"
+            },
+            "time": "2025-02-27T21:57:21+00:00"
         },
         {
             "name": "brick/math",
@@ -2029,16 +2090,16 @@
         },
         {
             "name": "league/commonmark",
-            "version": "2.6.1",
+            "version": "2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/commonmark.git",
-                "reference": "d990688c91cedfb69753ffc2512727ec646df2ad"
+                "reference": "6fbb36d44824ed4091adbcf4c7d4a3923cdb3405"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/d990688c91cedfb69753ffc2512727ec646df2ad",
-                "reference": "d990688c91cedfb69753ffc2512727ec646df2ad",
+                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/6fbb36d44824ed4091adbcf4c7d4a3923cdb3405",
+                "reference": "6fbb36d44824ed4091adbcf4c7d4a3923cdb3405",
                 "shasum": ""
             },
             "require": {
@@ -2075,7 +2136,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "2.7-dev"
+                    "dev-main": "2.8-dev"
                 }
             },
             "autoload": {
@@ -2132,7 +2193,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-12-29T14:10:59+00:00"
+            "time": "2025-05-05T12:20:28+00:00"
         },
         {
             "name": "league/config",

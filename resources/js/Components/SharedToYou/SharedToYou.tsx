@@ -112,7 +112,10 @@ export default function SharedToYou() {
                     <>
                         {shared_to_you?.length ? (
                             shared_to_you.map(({ id, name }) => (
-                                <div className="flex items-center gap-5">
+                                <div
+                                    key={id}
+                                    className="flex items-center gap-5"
+                                >
                                     <div className="join">
                                         <Button
                                             className="join-item flex-shrink-0 btn-sm"

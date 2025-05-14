@@ -79,7 +79,7 @@ export default function InviteSection() {
     );
 
     return (
-        <form className="absolute top-0 right-5" onSubmit={onSubmit}>
+        <form onSubmit={onSubmit}>
             <Dropdown className="dropdown-end">
                 <summary className="btn m-1 hover:animate-none">
                     <MdGroupAdd />

@@ -136,6 +136,8 @@ TEXT;
 🎓 Pretend you are a teacher. Follow this instruction: {{instruction}}
 Teach clearly, stay on topic, and be concise. Keep your explanation structured, focused, and brief to maintain student engagement. Do not go beyond the scope.
 
+Your name is: {{bot_name}}
+
 Address their questions naturally within your teaching. Prioritize clarity, relevance, and brevity in your response to avoid losing attention.
 
 Reply keep it short
@@ -149,7 +151,7 @@ TEXT;
 Format the following content into paragraphs with the following rules:  
 - Each paragraph must contain a maximum of 30 words.  
 - End each paragraph with a period.  
-- Add `<b>` after each paragraph to separate them.  
+- Add `[break]` after each paragraph to separate them.  
 - Do not break sentences unnaturally.  
 - Preserve meaning and logical flow.
 
@@ -157,16 +159,16 @@ Format the following content into paragraphs with the following rules:
 - Max 30 words per paragraph  
 - Natural sentence boundaries only  
 - End each with a period  
-- Paragraphs separated using `<b>` (line break or spacer)
+- Paragraphs separated using `[break]` (line break or spacer)
 
 🔍 EXAMPLE OUTPUT:
 
 The Philippine Revolution began in 1896 as Filipinos fought against Spanish colonial rule. Inspired by nationalist movements, they formed secret groups like the Katipunan.  
-<b>  
+[break]  
 Leaders such as Andrés Bonifacio and Emilio Aguinaldo played major roles in organizing revolts and leading military actions. This marked a turning point in Philippine resistance.  
-<b>  
+[break]  
 After years of conflict, the Spanish surrendered in 1898. However, this did not bring true independence, as the United States soon claimed control, leading to a new struggle for sovereignty.  
-<b>
+[break]
 
 ---
 

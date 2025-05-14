@@ -1,4 +1,4 @@
-import { ChangeEvent, FormHTMLAttributes, useCallback } from "react";
+import { ChangeEvent, FormEvent, FormHTMLAttributes, useCallback } from "react";
 
 interface Option {
     label: string;
@@ -26,24 +26,29 @@ export default function Filter({
     const onChange = useCallback(
         ({ target: { checked, value } }: ChangeEvent<HTMLInputElement>) => {
             if (checked && onFilterChange) {
-                if (value == "x") {
-                    onFilterChange(null);
-                } else {
-                    onFilterChange(value);
-                }
+                onFilterChange(value);
+            }
+        },
+        [onFilterChange]
+    );
+
+    const onReset = useCallback(
+        (event: FormEvent<HTMLFormElement>) => {
+            if (onFilterChange) {
+                onFilterChange(null);
             }
         },
         [onFilterChange]
     );
 
     return (
-        <form {...props} name={name} className={`filter ${className ?? ""}`}>
-            <input
-                className="btn btn-square"
-                type="reset"
-                value="×"
-                onChange={onChange}
-            />
+        <form
+            {...props}
+            name={name}
+            className={`filter ${className ?? ""}`}
+            onReset={onReset}
+        >
+            <input className="btn btn-square" type="reset" value="×" />
             {options.map(({ label, value: val }) => (
                 <input
                     key={val}

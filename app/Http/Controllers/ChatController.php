@@ -95,7 +95,8 @@ class ChatController extends Controller
             'user_context' => $user_context,
             'read_only' => !!$user_context && $user_context != $user->id,
             'is_owner' => $user->id == $examFile->owner_id,
-            'other_users' => Inertia::defer(fn() => User::where('id', '!=', $examFile->owner_id)->get())
+            'other_users' => Inertia::defer(fn() => User::where('id', '!=', Auth::id())->get()),
+            'has_rating' => !!$user->rating,
         ]);
     }
 
@@ -104,7 +105,7 @@ class ChatController extends Controller
         $examFile = ExamFile::findOrFail($id);
 
         $validated = $request->validate([
-            'content' => 'required|string|max:1000',
+            'content' => 'required|string|max:1000|blasp_check',
             'user_context' => 'nullable|exists:users,id',
         ], [
             'content.required' => 'You haven\'t typed anything',

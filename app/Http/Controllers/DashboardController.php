@@ -33,18 +33,20 @@ class DashboardController extends Controller
                     ->orderBy('name', 'asc')
                     ->get() : []
             ),
-            'files' => Inertia::defer(fn() => ExamFile::where(function ($query) use ($user) {
-                $query->where('owner_id', $user->id)
-                    ->whereDoesntHave('folders'); // Owned files not in any folder
-            })->orWhere(function ($query) use ($user) {
-                $query->whereHas('accepted', function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                })
-                    ->whereHas('folders', function ($q) use ($user) {
-                        $q->where('owner_id', '!=', $user->id);
-                    }); // Shared files in other people’s folders
-            })->orderBy('name', 'asc')->get()),
-
+            'files' => Inertia::defer(
+                fn() =>
+                ExamFile::where(function ($query) use ($user) {
+                    // Case 1: Owned files not in any folder
+                    $query->where('owner_id', $user->id)
+                        ->whereDoesntHave('folders');
+                })->orWhere(function ($query) use ($user) {
+                    $query->whereHas('accepted', fn($q) => $q->where('user_id', $user->id))
+                        ->where(function ($q) use ($user) {
+                            $q->whereHas('folders', fn($folderQ) => $folderQ->where('owner_id', '!=', $user->id))
+                                ->orWhereDoesntHave('folders');
+                        });
+                })->orderBy('name', 'asc')->get()
+            ),
             'parent_id' => null
         ]);
     }

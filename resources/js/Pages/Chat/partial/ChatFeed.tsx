@@ -15,21 +15,26 @@ import echo from "@/echo";
 import { GAIAStatus, UserMessageSent } from "@/types/Types";
 import Avatar from "@/Components/Avatar/Avatar";
 import ReplyNode from "../components/ReplyNode";
-import GAIABubble from "./GAIABubble";
 import BotAvatar from "@/Components/Avatar/BotAvatar";
+import { useSwal } from "@/Hook/SweetAlert/useSwal";
+import { p } from "motion/react-client";
 
 export default function ChatFeed() {
+    const swal = useSwal();
+
     const {
         props: {
             exam_file,
             messages,
             auth: { user },
             user_context,
-            bot_name,
+            bot,
+            has_rating,
         },
     } = usePage<ChatPageProps>();
 
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
 
     const { id: exam_id } = useMemo(() => {
         return exam_file ?? {};
@@ -54,6 +59,47 @@ export default function ChatFeed() {
             });
         },
         [patch, exam_id]
+    );
+
+    const onReset = useCallback(
+        (event: FormEvent<HTMLFormElement>) => {
+            if (swal) {
+                swal.fire({
+                    title: "Are you sure you want to leave the chat room?",
+                    text: "Thank you for using GAIA — your interactive learning platform. We hope you enjoyed your session!",
+                    icon: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#FF746C",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Leave",
+                    cancelButtonText: "Stay",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (!has_rating) {
+                            swal.fire({
+                                title: "We'd love your feedback!",
+                                text: "Would you like to rate your experience with GAIA?",
+                                icon: "question",
+                                showCancelButton: true,
+                                confirmButtonColor: "#FF746C",
+                                cancelButtonColor: "#6c757d",
+                                confirmButtonText: "Rate Now",
+                                cancelButtonText: "Maybe Later",
+                            }).then((rateResult) => {
+                                if (rateResult.isConfirmed) {
+                                    router.visit("/rate-us/create"); // Adjust if using a named route
+                                } else {
+                                    router.visit(route("dashboard.index"));
+                                }
+                            });
+                        } else {
+                            router.visit(route("dashboard.index"));
+                        }
+                    }
+                });
+            }
+        },
+        [swal, has_rating]
     );
 
     useEffect(() => {
@@ -111,9 +157,7 @@ export default function ChatFeed() {
                         )}
                         <button
                             className="btn btn-sm btn-error"
-                            onClick={() =>
-                                router.visit(route("dashboard.index"))
-                            }
+                            onClick={() => formRef.current?.reset()}
                         >
                             Leave Chat
                         </button>
@@ -140,7 +184,7 @@ export default function ChatFeed() {
                             <ChatBubble
                                 avatarNode={
                                     is_gaia ? (
-                                        <BotAvatar name={bot_name} />
+                                        <BotAvatar name={bot.name} />
                                     ) : (
                                         <Avatar name={sender?.name} />
                                     )
@@ -160,10 +204,10 @@ export default function ChatFeed() {
                                         ? "start"
                                         : "end"
                                 }
-                                sender={!is_gaia ? sender?.name : bot_name}
+                                sender={!is_gaia ? sender?.name : bot.name}
                                 time={created_at}
                             >
-                                {content.split("<b>").join("\n\n")}
+                                {content.split("[break]").join("\n\n")}
                             </ChatBubble>
                         )
                     )}
@@ -171,7 +215,7 @@ export default function ChatFeed() {
             </div>
 
             {/* Chat Input */}
-            <form onSubmit={onSubmit}>
+            <form ref={formRef} onSubmit={onSubmit} onReset={onReset}>
                 <ChatInput
                     onChange={({ target }) => setData("content", target.value)}
                     value={data.content}

@@ -70,4 +70,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ExamFileSharedAccepted::class, 'user_id');
     }
+
+    public function rating()
+    {
+        return $this->hasOne(UserRating::class, 'user_id');
+    }
 }

@@ -42,6 +42,10 @@ export default function Welcome({
                 </nav>
             </header>
 
+            <div className="sm:hidden fixed w-screen h-screen bg-base-300 z-50 flex justify-center items-center">
+                Sorry but, Mobile version is not supported yet
+            </div>
+
             {/* Hero Section with Gradient Background */}
             <section className="hero min-h-[70vh] bg-gradient-to-r from-primary to-secondary text-primary-content">
                 <div className="hero-content text-center">

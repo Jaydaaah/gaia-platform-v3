@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Events\GAIAResponse;
 use App\Events\GAIAStatus;
+use App\Events\UserMessageSent;
 use App\Instructions\GAIAInstruct;
 use App\Models\ExamFile;
 use App\Models\Message;
@@ -34,6 +35,7 @@ class ProcessPromptJob implements ShouldQueue
     {
         $user = User::find($this->message->sender_id);
         $exam_file_id = $this->exam_file->id;
+        $bot = $this->exam_file->exam_bot;
 
         $messages = $this->exam_file->message()
             ->whereNot('id', $this->message->id)
@@ -69,9 +71,9 @@ class ProcessPromptJob implements ShouldQueue
         $chat = $model->startChat(history: $history);
 
         $prompt = str_replace(
-            ["{{instruction}}", "{{prompt}}"],
-            [$this->exam_file->context->instruction, $content],
-            GAIAInstruct::PROMPT_INSTRUCTION
+            ["{{instruction}}", "{{prompt}}", "{{bot_name}}"],
+            [$this->exam_file->context->instruction, $content, $bot->name],
+            GAIAInstruct::PROMPT_INSTRUCTION,
         );
         $response = $chat->sendMessage($prompt);
         $response_text = $response->text();
@@ -93,5 +95,6 @@ class ProcessPromptJob implements ShouldQueue
 
         broadcast(new GAIAResponse($exam_file_id, $user->id, $post_response_text));
         broadcast(new GAIAStatus($exam_file_id, $user->id, "responded"));
+        broadcast(new UserMessageSent($exam_file_id, $user->id));
     }
 }

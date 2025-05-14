@@ -7,6 +7,7 @@ use App\Http\Controllers\ExamFileController;
 use App\Http\Controllers\ExamNoteController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RateUsController;
 use App\Http\Controllers\ShareableController;
 use App\Http\Controllers\UnrealSpeechController;
 use Illuminate\Foundation\Application;
@@ -38,6 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('exam-file/accept', [ExamFileController::class, 'accept'])->name('examfile.accept');
     Route::delete('exam-file/delete/{exam_file_id}', [ExamFileController::class, 'destroy'])->name('examfile.destroy');
     Route::patch('exam-file/move/{exam_file_id}', [ExamFileController::class, 'move'])->name('examfile.move');
+
+    Route::resource('/rate-us', RateUsController::class)->names('rate-us');
 
     Route::post('/unreal-speech', [UnrealSpeechController::class, 'synthesize'])->name('speech.synthesize');
 });

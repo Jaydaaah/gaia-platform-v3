@@ -1,17 +1,6 @@
-import { MdNotes } from "react-icons/md";
-import Dropdown from "@/Components/Dropdown/Dropdown";
-import DropdownContent from "@/Components/Dropdown/DropdownContent";
-import { router, useForm, usePage } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
 import { ChatPageProps } from "../types";
-import {
-    FocusEvent,
-    FormEvent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef } from "react";
 import Loading from "@/Components/Loading/Loading";
 
 export default function NotesSection() {
@@ -69,7 +58,16 @@ export default function NotesSection() {
                 </div>
             )}
             <textarea
-                className="w-full h-full focus:ring-0 bg-neutral/70 border-neutral/50 focus:border-neutral focus:bg-neutral/90 text-neutral-content resize-none rounded-t-box p-4 pt-2"
+                className="
+                w-full h-full overflow-y-scroll resize-none
+                p-4 pt-2
+                font-mono text-base-content text-sm leading-relaxed
+                bg-base-100 shadow-inner
+                border-l-4 border-b-0 border-neutral-500 border-dashed
+                rounded-t-box rounded-none
+                focus:ring-0 focus:outline-none
+                [background-image:repeating-linear-gradient(var(--color-base-100),var(--color-base-100)_23px,var(--color-base-300)_24px)]
+                "
                 onChange={({ target }) => setData("content", target.value)}
                 value={data.content}
                 onBlur={() => hasChanges && formRef.current?.requestSubmit()}
