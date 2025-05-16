@@ -7,6 +7,7 @@ use App\Events\GAIAStatus;
 use App\Events\UserMessageSent;
 use App\Instructions\GAIAInstruct;
 use App\Models\ExamFile;
+use App\Models\ExamNotes;
 use App\Models\Message;
 use App\Models\User;
 use Gemini\Data\Content;
@@ -44,6 +45,10 @@ class ProcessPromptJob implements ShouldQueue
             ->get()
             ->reverse();
 
+        $notes = ExamNotes::where('exam_file_id', $exam_file_id)
+            ->where('owner_id', $user->id)->first();
+        $notes_content = $notes->content ?? "";
+
         $history = $messages->map(function ($message) {
             $role = null;
             $part = '';
@@ -65,14 +70,14 @@ class ProcessPromptJob implements ShouldQueue
 
         broadcast(new GAIAStatus($exam_file_id, $user->id, "typing"));
 
-        $content = $user->name . ': ' . $this->message->content;
+        $content = $this->message->content;
 
         $model = Gemini::generativeModel('models/gemini-1.5-flash');
         $chat = $model->startChat(history: $history);
 
         $prompt = str_replace(
-            ["{{instruction}}", "{{prompt}}", "{{bot_name}}"],
-            [$this->exam_file->context->instruction, $content, $bot->name],
+            ["{{instruction}}", "{{prompt}}", "{{bot_name}}", "{{student_note}}", "{{student_name}}"],
+            [$this->exam_file->context->instruction, $content, $bot->name, $notes_content, $user->name],
             GAIAInstruct::PROMPT_INSTRUCTION,
         );
         $response = $chat->sendMessage($prompt);
